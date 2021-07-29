@@ -142,6 +142,7 @@ if ! command -v rclone >/dev/null ;then
   sudo chown root: /usr/bin/rclone
   echobright "rm -rf ~/rclone-current-linux-arm.zip ~/rclone-temp"
   rm -rf ~/rclone-current-linux-arm.zip ~/rclone-temp
+  echobright "Rclone installation successful. Proceeding..."
 fi
 
 #menu button
@@ -686,7 +687,7 @@ fi
 
 #if user has configured at least 1 drive, display these buttons:
 if [ ! -z "$remotes" ];then
-  mountbutton=(--field="Mount Drive"!"${DIRECTORY}/icons/search.png"!"Connect a cloud drive to your computer like a USB drive":FBTN "$0 mountdrive")
+  mountbutton=(--field="Mount Drive"!"${DIRECTORY}/icons/mount.png"!"Connect a cloud drive to your computer like a USB drive":FBTN "$0 mountdrive")
   browsebutton=(--field="Browse Drive"!"${DIRECTORY}/icons/browse.png"!"A simple file explorer with link creation and file-downloading support":FBTN "$0 browsedrive")
 fi
 
