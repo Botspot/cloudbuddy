@@ -6,12 +6,17 @@ DIRECTORY="$(readlink -f "$(dirname "$0")")"
 error() {
   echo -e "\e[91m$1\e[39m" | sed 's|<b>||g' | sed 's|</b>||g' 1>&2
   zenity --error --width 300 --text "$(echo -e "$1" | sed 's/&/&amp;/g')"
+  kill $(cat "${DIRECTORY}/mypid") $(list_descendants $(cat "${DIRECTORY}/mypid")) 2>/dev/null
   exit 1
 }
 
 warning() { #just like error, but doesn't exit
   echo -e "\e[91m$1\e[39m" | sed 's|<b>||g' | sed 's|</b>||g' 1>&2
   zenity --error --width 300 --text "$(echo -e "$1" | sed 's/&/&amp;/g')"
+}
+
+echobright() {
+  echo -e "\e[97m$@\e[39m"
 }
 
 list_descendants() { #list descent PIDs to the given parent PID.
@@ -38,7 +43,7 @@ drivetype() { #determine the type of a $1-specified drive. 'gdrive', 'dropbox', 
   
   #ordinary rclone config file location: $HOME/.config/rclone/rclone.conf
   if [ ! -f "$(rclone config file | sed -n 2p)" ];then
-    echo -e "drivetype(): rclone config file not found!\nIt is: $(rclone config file)" 1>&2
+    echobright "drivetype(): rclone config file not found!\nIt is: $(rclone config file)" 1>&2
     echo other
     return 0
   fi
@@ -80,7 +85,7 @@ $drive"
 #kill other instances of this script. Necessary for yad's --form buttons as they spawn child processes
 if [ -f "${DIRECTORY}/mypid" ] ;then
   #echo -e "parent: $(cat "${DIRECTORY}/mypid")\nchildren: $(list_descendants $(cat "${DIRECTORY}/mypid"))"
-  kill -s SIGHUP $(list_descendants $(cat "${DIRECTORY}/mypid")) $(cat "${DIRECTORY}/mypid") 2>/dev/null
+  kill -s SIGHUP $(cat "${DIRECTORY}/mypid") $(list_descendants $(cat "${DIRECTORY}/mypid") | tr '\n' ' ') 2>/dev/null
 fi
 mypid=$$
 echo $mypid > "${DIRECTORY}/mypid"
@@ -92,21 +97,21 @@ if [ ! -f "${DIRECTORY}/no-update" ];then
   latesthash="$(git ls-remote https://github.com/Botspot/cloudbuddy HEAD | awk '{print $1}')"
   
   if [ "$localhash" != "$latesthash" ] && [ ! -z "$latesthash" ] && [ ! -z "$localhash" ];then
-    echo "CloudBuddy is out of date. Downloading new version..."
-    echo "To prevent update checking from now on, create a file at ${DIRECTORY}/no-update"
+    echobright "CloudBuddy is out of date. Downloading new version..."
+    echobright "To prevent update checking from now on, create a file at ${DIRECTORY}/no-update"
     sleep 1
     
     #get file hash of this running script to compare it later
     oldhash="$(shasum "$0")"
     
-    echo "running 'git pull'..."
+    echobright "running 'git pull'..."
     git pull
     
     if [ "$oldhash" == "$(shasum "$0")" ];then
       #this script not modified by git pull
-      echo "git pull finished. Proceeding..."
+      echobright "git pull finished. Proceeding..."
     else
-      echo "git pull finished. Reloading script..."
+      echobright "git pull finished. Reloading script..."
       #run updated script in background
       ( "$0" "$@" ) &
       exit 0
@@ -116,13 +121,32 @@ if [ ! -f "${DIRECTORY}/no-update" ];then
 fi
 
 #install dependencies
-command -v yad >/dev/null || (echo "Installing 'yad'..." ; sudo apt update && sudo apt install -y yad || error "Failed to install yad!")
-command -v xclip >/dev/null || (echo "Installing 'xclip'..." ; sudo apt update && sudo apt install -y xclip || error "Failed to install xclip!")
-command -v expect >/dev/null || (echo "Installing 'expect'..." ; sudo apt update && sudo apt install -y expect || error "Failed to install expect!")
+command -v yad >/dev/null || (echobright "Installing 'yad'..." ; sudo apt update && sudo apt install -y yad || error "Failed to install yad!")
+command -v xclip >/dev/null || (echobright "Installing 'xclip'..." ; sudo apt update && sudo apt install -y xclip || error "Failed to install xclip!")
+command -v expect >/dev/null || (echobright "Installing 'expect'..." ; sudo apt update && sudo apt install -y expect || error "Failed to install expect!")
+if ! command -v rclone >/dev/null ;then
+  echobright "Installing 'rclone'..."
+  
+  echobright "wget https://downloads.rclone.org/rclone-current-linux-arm.zip -O rclone-current-linux-arm.zip"
+  wget https://downloads.rclone.org/rclone-current-linux-arm.zip -O rclone-current-linux-arm.zip || error "Failed to download rclone from downloads.rclone.org!"
+  
+  echobright "unzip -j -o -d rclone-temp rclone-current-linux-arm.zip"
+  unzip -j -o -d rclone-temp rclone-current-linux-arm.zip || error "Failed to extract ~/rclone-current-linux-arm.zip"
+  
+  echobright "sudo mv ~/rclone-temp/rclone /usr/bin/rclone"
+  sudo mv ~/rclone-temp/rclone /usr/bin/rclone || error "Failed to move rclone binary to /usr/bin/rclone"
+  echobright "sudo mv ~/rclone-temp/rclone.1 /usr/share/man/man1/rclone.1"
+  sudo mv ~/rclone-temp/rclone.1 /usr/share/man/man1/rclone.1
+  
+  echobright "sudo chown root: /usr/bin/rclone"
+  sudo chown root: /usr/bin/rclone
+  echobright "rm -rf ~/rclone-current-linux-arm.zip ~/rclone-temp"
+  rm -rf ~/rclone-current-linux-arm.zip ~/rclone-temp
+fi
 
 #menu button
 if [ ! -f ~/.local/share/applications/cloudbuddy.desktop ];then
-  echo "Creating menu button..."
+  echobright "Creating menu button..."
   mkdir -p ~/.local/share/applications
   echo "[Desktop Entry]
 Name=CloudBuddy
@@ -149,6 +173,7 @@ remotes="$(rclone listremotes)"
 
 #COMMAND-LINE SUBSCRIPTS
 if [ "$1" == newdrive ];then
+  echobright "New drive"
   drive=''
   while [ -z "$drive" ];do
     drive="$(yad "${yadflags[@]}" --form \
@@ -159,7 +184,7 @@ if [ "$1" == newdrive ];then
     button=$?
     
     #Window closed some other way than the drive selection buttons, go back to start page
-    [ $button != 4 ] && [ $button != 2 ] && [ $button != 0 ] && (echo "User did not choose a drive type to create. Going back..." ; break)
+    [ $button != 4 ] && [ $button != 2 ] && [ $button != 0 ] && (echobright "User did not choose a drive type to create. Going back..." ; break)
     
     if [ -z "$drive" ];then
       yad "${yadflags[@]}" --text="  A Drive must be given a name.  " \
@@ -171,7 +196,7 @@ if [ "$1" == newdrive ];then
     #change button number to script-readable drive type
     drivetype="$(echo "$button" | sed s/4/gdrive/g | sed s/2/onedrive/g | sed s/0/dropbox/g)"
     
-    echo "expect "\""${DIRECTORY}/expect-scripts/${drivetype}.exp"\"""
+    echobright "expect "\""${DIRECTORY}/expect-scripts/${drivetype}.exp"\"""
     #These expect scripts read the "drivename" environment variable.
     drivename="$drive"
     expect "${DIRECTORY}/expect-scripts/${drivetype}.exp" &
@@ -201,9 +226,10 @@ if [ "$1" == newdrive ];then
   fi #everything in the above if statement is skipped if $button is not 0, 2, or 4
   
 elif [ "$1" == removedrive ];then
+  echobright "Remove drive"
   drive="$(echo "$2" | sed 's/:$//g')"
   if [ -z "$(echo "$remotes" | grep "$drive")" ];then
-    echo "CLI-selected drive '$drive' does not exist."
+    echobright "CLI-selected drive '$drive' does not exist."
     drive=''
   fi
   if [ -z "$drive" ];then
@@ -211,18 +237,18 @@ elif [ "$1" == removedrive ];then
   fi
   [ -z "$drive" ] && back
   
-  echo "rclone config disconnect "\""$drive:"\"""
-  rclone config disconnect "$drive": || echo "Don't worry - rclone errors above this point are normal and expected for certain cloud storage providers."
+  echobright "rclone config disconnect "\""$drive:"\"""
+  rclone config disconnect "$drive": || echobright "Don't worry - rclone errors above this point are normal and expected for certain cloud storage providers."
   
-  echo "rclone config delete "\""$drive"\"""
+  echobright "rclone config delete "\""$drive"\"""
   rclone config delete "$drive" #this rclone option DOES NOT ACCEPT A COLON!
   
 elif [ "$1" == mountdrive ];then
-  echo "Mount drive"
+  echobright "Mount drive"
   #usage: main.sh mountdrive driveName /path/to/mountpoint
   drive="$(echo "$2" | sed 's/:$//g')"
   if [ -z "$(echo "$remotes" | grep "$drive")" ];then
-    echo "CLI-selected drive '$drive' does not exist."
+    echobright "CLI-selected drive '$drive' does not exist."
     drive=''
   fi
   if [ -z "$drive" ];then
@@ -239,13 +265,13 @@ elif [ "$1" == mountdrive ];then
     fi
     
     if [ -z "$directory" ];then
-      echo "No directory chosen!"
+      echobright "No directory chosen!"
       yad "${yadflags[@]}" --text="No directory chosen!" --button="Try again"
     elif [ ! -d "$directory" ];then
-      echo "Directory $directory does not exist!"
+      echobright "Directory $directory does not exist!"
       yad "${yadflags[@]}" --text="No directory chosen!" --button="Try again"
     elif [ ! -z "$(ls -A "$directory")" ];then
-      echo "Directory $directory contains files!"
+      echobright "Directory $directory contains files!"
       yad "${yadflags[@]}" --text="  Directory $directory contains files!  "$'\n'"  It <b>must</b> be empty.  " --button="Try again"
     else
       break
@@ -256,19 +282,20 @@ elif [ "$1" == mountdrive ];then
   #this will run for a minimum of 7 seconds before returning to the main window.
   sleep 7 &
   sleeppid=$!
-  echo "rclone mount "\""$drive:"\"" "\""$directory"\"""
+  echobright "rclone mount "\""$drive:"\"" "\""$directory"\"""
   setsid bash -c 'errors="$(rclone mount "'"$drive"'": "'"$directory"'" 2>&1)"
     [ $? != 0 ] && warning "Rclone failed to mount <b>'"$drive"'</b> to <b>'"$directory"'</b>!'$'\n''Errors: $errors"' &
   wait $sleeppid
   
 elif [ "$1" == unmountdrive ];then
+  echobright "Unmount drive"
   #CLI usage: main.sh unmountdrive driveName
   #Alternative CLI usage: main.sh unmountdrive /path/to/mountpoint
   mounts="$(mount | grep fuse.rclone | sed 's/ type fuse.rclone (.*)//g' | sed 's/: on /:/g')"
   
   drives="$(echo "$mounts" | sed 's/:.*//g')"
   mountdirs="$(echo "$mounts" | sed 's/.*://g')"
-  #echo -e "Mounted drives: $drives\nMountdirs: $mountdirs"
+  #echobright "Mounted drives: $drives\nMountdirs: $mountdirs"
   
   if [ ! -z "$2" ] && [ ! -z "$(echo "$drives" | grep -x "$(echo "$2" | sed 's/:$//g')")" ];then
     #cli-specified drive name to unmount
@@ -288,7 +315,7 @@ elif [ "$1" == unmountdrive ];then
   fusermount -u "$mountpoint" || sudo umount "$mountpoint" || error "Failed to unmount <b>$mountpoint</b>!\nErrors: $(fusermount -u "$mountpoint" 2>&1)"
   
 elif [ "$1" == browsedrive ];then
-  echo "Browse drive"
+  echobright "Browse drive"
   #usage: main.sh browsedrive driveName prefix
   drive="$(echo "$2" | sed 's/:$//g')"
   if [ -z "$(echo "$remotes" | grep "$drive")" ];then
@@ -323,7 +350,7 @@ elif [ "$1" == browsedrive ];then
     
     if [ $fastmode == 0 ];then
       #get detailed information about each file in current folder.
-      echo "rclone lsjson "\""$drive:$(echo "$prefix" | sed 's|/$||g')"\"""
+      echobright "rclone lsjson "\""$drive:$(echo "$prefix" | sed 's|/$||g')"\"""
       #Json format converted to parsable raw text. Example line:
       #Path=Tripod.JPG,Name=Tripod.JPG,Size=1472358,MimeType=image/jpeg,ModTime=2018-09-02T04:12:36.807Z,IsDir=false,ID=1229VLzjsD1XUm5LgdwlfoWEqwpzbWU9p
       filelist="$(rclone lsjson "$drive:$(echo "$prefix" | sed 's|/$||g')" 2>&1 | sed 's/":"/=/g' | sed 's/":/=/g' | sed 's/^{"//g' | sed 's/","/,/g' | sed 's/,"/,/g' | sed 's/"}$//g' | sed 's/},$//g' | sed 's/"},$//g' | sed 's/}$//g' | sed '/^\]$/d' | sed '/^\[$/d')"
@@ -392,7 +419,7 @@ $id"
       
     else #fastmode == 1
       #simpler file browser mode with less GUI features but it loads faster
-      echo "rclone lsf "\""$drive:$(echo "$prefix" | sed 's|/$||g')"\"""
+      echobright "rclone lsf "\""$drive:$(echo "$prefix" | sed 's|/$||g')"\"""
       filelist="$(rclone lsf "$drive:$(echo "$prefix" | sed 's|/$||g')" 2>&1)"
       [ $? != 0 ] && error "rclone failed to acquire a file list from <b>$drive:$prefix</b>!\nErrors: $filelist"
       kill $loader_pid #close the progress bar window
@@ -440,7 +467,7 @@ $id"
           --width=300 --height=100 --center --auto-close --auto-kill \
           --no-buttons 2>/dev/null &
         loader_pid=$!
-        echo "rclone link "\""$drive:$prefix$output"\"""
+        echobright "rclone link "\""$drive:$prefix$output"\"""
         link="$(rclone link "$drive:$prefix$output" 2>&1)"
         exitcode=$?
         kill $loader_pid
@@ -487,7 +514,7 @@ $id"
             --width=300 --height=100 --center --auto-close --auto-kill \
             --no-buttons 2>/dev/null &
           loader_pid=$!
-          echo "rclone moveto "\""$drive:$prefix$output"\"" "\""$drive:$moveto"\"""
+          echobright "rclone moveto "\""$drive:$prefix$output"\"" "\""$drive:$moveto"\"""
           errors="$(rclone moveto "$drive:$prefix$output" "$drive:$moveto" 2>&1)"
           if [ $? != 0 ];then
             warning "Failed to move <b>$prefix$output</b> to <b>$moveto</b>.\nErrors: $errors"
@@ -507,10 +534,10 @@ $id"
           for file in $output ;do
             if [[ "$file" == */ ]];then
               #if folder, delete folder
-              echo "rclone purge "\""$drive:$prefix$file"\"""
+              echobright "rclone purge "\""$drive:$prefix$file"\"""
               rclone purge "$drive:$prefix$file"
             else
-              echo "rclone deletefile "\""$drive:$prefix$file"\"""
+              echobright "rclone deletefile "\""$drive:$prefix$file"\"""
               rclone deletefile "$drive:$prefix$file"
             fi
           done
@@ -597,19 +624,18 @@ $id"
     elif [ $button == 0 ] && [ ! "$(echo "$output" | wc -l)" -gt 1 ];then
       #open file/folder - double-clicked
       if [[ "$output" == */ ]];then
-        echo "Folder selected: $(echo "$output" | sed 's|/$||g')"
+        echobright "Folder selected: $(echo "$output" | sed 's|/$||g')"
         if [ ! -z $prefix ];then
           prefix="$prefix$output"
         else
           prefix="$output"
         fi
       else
-        echo "File selected: $(echo "$output")"
+        echobright "File selected: $(echo "$output")"
         
         #download file
         tmpdir="$(mktemp -d)"
         
-        mypid=$$
         set -o pipefail
         (echo "# "; sleep infinity) | yad "${yadflags[@]}" --progress --pulsate --title=Downloading \
           --text="Downloading:"$'\n'"<b>$drive:$prefix$output</b>"$'\n'"To: <b>$tmpdir</b>..." \
@@ -617,7 +643,7 @@ $id"
           --button=Cancel:"bash -c '$0 browsedrive "\""$drive"\"" "\""$prefix"\""; kill $$ $(list_descendants $$)'" &
         loader_pid=$!
         
-        echo "rclone copy "\""$drive:$prefix$output\""" "\""$tmpdir"\"""
+        echobright "rclone copy "\""$drive:$prefix$output\""" "\""$tmpdir"\"""
         errors="$(rclone copy -P "$drive:$prefix$output" "$tmpdir" 2>&1 | tee /dev/stderr)"
         exitcode=$?
         kill $loader_pid #close the progress bar window
@@ -641,13 +667,14 @@ $id"
   done #end of interactive file browser - forever loop
 
 elif [ "$1" == webinterface ];then
+  echobright "Web Interface"
   "${DIRECTORY}/terminal-run" "trap 'sleep infinity' EXIT
     echo 'rclone rcd --rc-web-gui'
     rclone rcd --rc-web-gui
     " "Running Rclone Web Interface"
 fi #END OF COMMAND-LINE subscripts
 
-#Run main window as a child process if command-line flags were used above for a subscript. This prevents subsequent subscripts from reading invalid cli values.
+#Run main window as a child process if command-line flags were used above for a subscript. This prevents subsequent subscripts from reading undesired cli values.
 if [ ! -z "$1" ];then
   back
 fi
