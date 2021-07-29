@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg" xmlns:bx="https://greentree.cf">
+  <defs>
+    <linearGradient gradientUnits="userSpaceOnUse" x1="-117.309" y1="42.555" x2="-117.309" y2="191.363" id="gradient-1" gradientTransform="matrix(1.881974, -1.215029, 0.865632, 1.340787, 397.716553, -63.757694)">
+      <stop offset="0" style="stop-color: rgb(61, 223, 255);"/>
+      <stop offset="1" style="stop-color: rgb(0, 54, 214);"/>
+    </linearGradient>
+    <filter id="filter-1" x="-500%" y="-500%" width="1000%" height="1000%" bx:preset="inner-shadow 1 0 0 17 1 rgba(0,0,0,0.7)">
+      <feOffset dx="0" dy="0"/>
+      <feGaussianBlur stdDeviation="17"/>
+      <feComposite operator="out" in="SourceGraphic"/>
+      <feComponentTransfer result="choke">
+        <feFuncA type="linear" slope="2"/>
+      </feComponentTransfer>
+      <feFlood flood-color="rgba(0,0,0,0.7)" result="color"/>
+      <feComposite operator="in" in="color" in2="choke" result="shadow"/>
+      <feComposite operator="over" in="shadow" in2="SourceGraphic"/>
+    </filter>
+    <filter id="gaussian-blur-filter-0" color-interpolation-filters="sRGB" x="-500%" y="-500%" width="1000%" height="1000%" bx:preset="gaussian-blur 1 30">
+      <feGaussianBlur stdDeviation="30 30" edgeMode="none"/>
+    </filter>
+    <filter id="inner-shadow-filter-1" x="-500%" y="-500%" width="1000%" height="1000%" bx:preset="inner-shadow 1 0 0 25 1 rgba(255,255,255,1)">
+      <feOffset dx="0" dy="0"/>
+      <feGaussianBlur stdDeviation="25"/>
+      <feComposite operator="out" in="SourceGraphic"/>
+      <feComponentTransfer result="choke">
+        <feFuncA type="linear" slope="2"/>
+      </feComponentTransfer>
+      <feFlood flood-color="rgba(255,255,255,1)" result="color"/>
+      <feComposite operator="in" in="color" in2="choke" result="shadow"/>
+      <feComposite operator="over" in="shadow" in2="SourceGraphic"/>
+    </filter>
+    <filter id="drop-shadow-filter-0" x="-500%" y="-500%" width="1000%" height="1000%" bx:preset="drop-shadow 1 0 0 14 0.38 rgba(255,255,255,1)">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="14"/>
+      <feOffset dx="0" dy="0"/>
+      <feComponentTransfer result="offsetblur">
+        <feFuncA id="spread-ctrl" type="linear" slope="0.76"/>
+      </feComponentTransfer>
+      <feFlood flood-color="rgba(255,255,255,1)" x="10" y="10"/>
+      <feComposite in2="offsetblur" operator="in"/>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="filter-2" x="-500%" y="-500%" width="1000%" height="1000%" bx:preset="inner-shadow 1 0 0 17 1 rgba(0,0,0,0.7)">
+      <feOffset dx="0" dy="0"/>
+      <feGaussianBlur stdDeviation="17"/>
+      <feComposite operator="out" in="SourceGraphic"/>
+      <feComponentTransfer result="choke">
+        <feFuncA type="linear" slope="2"/>
+      </feComponentTransfer>
+      <feFlood flood-color="rgba(0,0,0,0.7)" result="color"/>
+      <feComposite operator="in" in="color" in2="choke" result="shadow"/>
+      <feComposite operator="over" in="shadow" in2="SourceGraphic"/>
+    </filter>
+    <clipPath id="clip-0">
+      <path d="M 393.595 414.501 L 93.047 414.501 L 93.047 414.689 L 83.902 414.493 L 83.212 414.477 C 60.924 414.018 41.21 404.715 26.748 389.933 C 12.233 375.066 3.512 355.205 3.512 332.911 C 3.512 310.486 12.409 290.45 27.059 275.571 C 41.679 260.757 60.192 252.151 81.794 251.381 L 81.788 253.276 L 85.788 253.288 L 85.8 249.393 C 85.895 203.895 104.367 163.094 134.257 133.331 C 164.161 103.529 204.984 85.326 250.472 85.326 C 289.073 85.326 324.294 98.459 352.443 120.688 C 380.194 142.584 399.997 172 409.366 206.571 L 405.053 205.821 L 404.369 209.762 L 410.47 210.823 L 411.661 211.032 C 435.917 215.202 456.944 227.78 472.181 245.738 C 487.457 263.737 496.488 286.634 496.488 312.009 C 496.488 340.459 485.125 365.828 466.47 384.483 C 447.815 403.138 422.445 414.501 393.996 414.501 C 393.861 414.501 393.729 414.501 393.595 414.501 Z" style="stroke-width: 20px; filter: url(#filter-2);"/>
+    </clipPath>
+  </defs>
+  <g style="filter: url(#inner-shadow-filter-1); clip-path: url(#clip-0);">
+    <path d="M 393.595 399.501 L 84.047 399.501 L 84.047 399.492 L 83.166 399.477 C 64.163 399.763 49.604 392.556 37.332 379.307 C 24.435 366.891 18.512 352.312 18.512 332.911 C 18.512 313.419 24.783 298.471 37.813 286.025 C 50.18 272.765 64.846 265.884 84.023 266.33 L 100.749 266.109 L 100.791 252.333 L 100.8 249.26 C 100.216 206.944 116.555 171.419 144.903 143.898 C 172.465 115.68 207.986 100.326 250.472 100.326 C 286.5 100.326 317.159 111.442 343.195 132.497 C 369.723 152.943 387.666 179.801 395.609 213.24 L 398.313 223.933 L 407.886 225.598 L 409.356 225.855 C 430.887 229.033 447.5 239.181 460.834 255.546 C 474.779 271.281 481.488 289.299 481.488 312.009 C 481.488 337.386 472.631 357.11 455.864 373.877 C 439.097 390.644 419.372 399.501 393.996 399.501 C 393.861 399.501 393.729 399.501 393.595 399.501 Z" style="fill: url(#gradient-1); filter: none;">
+      <title>cloud</title>
+    </path>
+    <circle style="filter: url(#gaussian-blur-filter-0); mix-blend-mode: hard-light; fill: rgb(217, 0, 255); opacity: 0.7;" cx="309.179" cy="293.077" r="57.88" transform="matrix(1.785956, 0, 0, 1.391756, -171.745224, -90.768944)"/>
+  </g>
+  <g style="visibility: hidden;" transform="matrix(2.240116, 0, 0, 2.240116, 512.786865, -12.001692)">
+    <title>components</title>
+    <circle style="fill: rgb(216, 216, 216);" cx="-117.099" cy="116.959" r="74.404"/>
+    <circle style="fill: rgb(216, 216, 216);" cx="-190.921" cy="153.971" r="37.315"/>
+    <circle style="fill: rgb(216, 216, 216);" cx="-53.029" cy="144.64" r="46.646"/>
+    <rect x="-191.838" y="161.345" width="138.63" height="29.941" style="fill: rgb(174, 174, 174);"/>
+  </g>
+  <path d="M 393.595 406.501 L 85.047 406.501 L 85.047 406.516 L 84.068 406.495 L 83.196 406.477 C 62.65 406.413 45.728 398.308 32.434 384.307 C 18.756 370.738 11.512 353.657 11.512 332.911 C 11.512 312.05 18.918 294.799 32.73 281.212 C 46.154 267.189 63.224 259.213 83.932 259.33 L 93.77 259.2 L 93.791 252.312 L 93.8 249.325 C 93.533 205.521 110.828 167.557 139.913 138.989 C 168.573 110.018 206.586 93.326 250.472 93.326 C 287.7 93.326 320.458 105.352 347.485 126.965 C 374.779 148.233 393.96 176.962 402.392 211.525 L 403.983 217.815 L 409.09 218.703 L 410.427 218.937 C 433.234 222.579 451.875 233.8 466.098 250.933 C 480.684 267.734 488.488 288.058 488.488 312.009 C 488.488 338.821 478.462 361.177 460.813 378.826 C 443.164 396.475 420.807 406.501 393.996 406.501 C 393.861 406.501 393.729 406.501 393.595 406.501 Z" style="filter: url(#filter-1); fill: none; stroke: rgb(0, 0, 0); stroke-width: 20px;">
+    <title>outline</title>
+  </path>
+  <rect x="176.29" y="229.721" width="43.606" height="94.285" style="filter: url(#drop-shadow-filter-0);" rx="21.803" ry="21.803">
+    <title>eye L</title>
+  </rect>
+  <rect x="280.104" y="229.721" width="43.606" height="94.285" style="filter: url(#drop-shadow-filter-0);" rx="21.803" ry="21.803">
+    <title>eye R</title>
+  </rect>
+</svg>
