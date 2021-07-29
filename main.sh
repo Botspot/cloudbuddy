@@ -82,7 +82,6 @@ if [ -f "${DIRECTORY}/mypid" ] ;then
   #echo -e "parent: $(cat "${DIRECTORY}/mypid")\nchildren: $(list_descendants $(cat "${DIRECTORY}/mypid"))"
   kill -s SIGHUP $(list_descendants $(cat "${DIRECTORY}/mypid")) $(cat "${DIRECTORY}/mypid") 2>/dev/null
 fi
-
 mypid=$$
 echo $mypid > "${DIRECTORY}/mypid"
 
@@ -90,6 +89,22 @@ echo $mypid > "${DIRECTORY}/mypid"
 command -v yad >/dev/null || (echo "Installing 'yad'..." ; sudo apt install -y yad || error "Failed to install yad!")
 command -v xclip >/dev/null || (echo "Installing 'xclip'..." ; sudo apt install -y xclip || error "Failed to install xclip!")
 command -v expect >/dev/null || (echo "Installing 'expect'..." ; sudo apt install -y expect || error "Failed to install expect!")
+
+#check for updates and auto-update if the no-update files does not exist
+if [ ! -f "${DIRECTORY}/no-update" ];then
+  cd "$DIRECTORY"
+  localhash="$(git rev-parse HEAD)"
+  latesthash="$(git ls-remote https://github.com/Botspot/cloudbuddy HEAD | awk '{print $1}')"
+  
+  if [ "$localhash" != "$latesthash" ] && [ ! -z "$latesthash" ] && [ ! -z "$localhash" ];then
+    echo "CloudBuddy is out of date. Downloading new version..."
+    git pull
+    #run updated script in background
+    ( "$0" "$@" ) &
+    exit 0
+  fi
+  cd "$HOME"
+fi
 
 yadflags=(--center --title="CloudBuddy" --separator='\n' --window-icon="${DIRECTORY}/icons/cloud.png")
 
@@ -252,13 +267,52 @@ elif [ "$1" == browsedrive ];then
       --no-buttons 2>/dev/null &
     loader_pid=$!
     
-    filelist="$(rclone lsf "$drive:$prefix" 2>&1)"
-    
-    [ $? != 0 ] && error "rclone failed to acquire a file list from <b>$drive:$prefix</b>!\nErrors: $filelist"
-    kill $loader_pid #close the progress bar window
-    
-    filelist="$(echo "$filelist" | tac | sed 's/$/\n/g' | sed "s|/"'$'"|/\n${DIRECTORY}/icons/folder.png|g" | tac | sed -z "s|\n${DIRECTORY}/icons/folder.png|${DIRECTORY}/icons/folder.png|g" | sed -z "s|\n\n|\n${DIRECTORY}/icons/none-24.png\n|g" | sed -z "s|^\n|${DIRECTORY}/icons/none-24.png\n|g")"
-    #echo "$filelist"
+    fastmode=0
+    if [ $fastmode == 0 ];then
+      #get detailed information about each file in current folder.
+      #Json format converted to parsable raw text. Example line:
+      #Path=Tripod.JPG,Name=Tripod.JPG,Size=1472358,MimeType=image/jpeg,ModTime=2018-09-02T04:12:36.807Z,IsDir=false,ID=1229VLzjsD1XUm5LgdwlfoWEqwpzbWU9p
+      filelist="$(rclone lsjson "$drive:$(echo "$prefix" | sed 's|/$||g')" 2>&1 | sed 's/":"/=/g' | sed 's/":/=/g' | sed 's/^{"//g' | sed 's/","/,/g' | sed 's/,"/,/g' | sed 's/"}$//g' | sed 's/"},$//g' | sed '/^\]$/d' | sed '/^\[$/d')"
+      [ $? != 0 ] && error "rclone failed to acquire a file list from <b>$drive:$prefix</b>!\nErrors: $filelist"
+      kill $loader_pid #close the progress bar window
+      
+      IFS=$'\n'
+      LIST=''
+      for file in $filelist ;do
+        #read in values. Unneeded values are commented out to save time
+        #path="$(echo "$file" | sed 's/^Path=//g' | sed 's/,Name=.*//g')"
+        #name="$(echo "$file" | sed 's/.*,Name=//g' | sed 's/,Size=.*//g')"
+        #size="$(echo "$file" | sed 's/.*Size=//g' | sed 's/,MimeType=.*//g')"
+        #mimetype="$(echo "$file" | sed 's/.*MimeType=//g' | sed 's/,ModTime=.*//g')"
+        #modtime="$(echo "$file" | sed 's/.*ModTime=//g' | sed 's/,IsDir=.*//g')"
+        isdir="$(echo "$file" | sed 's/.*IsDir=//g' | sed 's/,ID=.*//g')"
+        #id="$(echo "$file" | sed 's/.*ID=//g')"
+        #echo -e "Debug info:\nPath: $path\nName: $name\nSize: $size\nMimeType: $mimetype\nModTime: $modtime\nIsDir: $isdir\nID: $id\n"
+        
+        #if current file is a directory, add a trailing slash to filename
+        if [ "$isdir" == true ];then
+          file="$(echo "$file" | sed 's|,Size=|/,Size=|g')"
+          icon="${DIRECTORY}/icons/folder.png"
+        else
+          icon="${DIRECTORY}/icons/none-24.png"
+        fi
+        #echo "File now is: $file"
+        
+        LIST="$LIST
+$icon
+$file"
+      done
+      LIST="$(echo "$LIST" | tr ',' '\n' | sed 's/.*=//g' | grep . | sed 's/^-1$/0/g')"
+      #echo "$LIST"
+      
+    else #fastmode == 0
+      #simpler file browser mode with less GUI features but it loads faster
+      filelist="$(rclone lsf "$drive:$(echo "$prefix" | sed 's|/$||g')" 2>&1)"
+      [ $? != 0 ] && error "rclone failed to acquire a file list from <b>$drive:$prefix</b>!\nErrors: $filelist"
+      kill $loader_pid #close the progress bar window
+      filelist="$(echo "$filelist" | tac | sed 's/$/\n/g' | sed "s|/"'$'"|/\n${DIRECTORY}/icons/folder.png|g" | tac | sed -z "s|\n${DIRECTORY}/icons/folder.png|${DIRECTORY}/icons/folder.png|g" | sed -z "s|\n\n|\n${DIRECTORY}/icons/none-24.png\n|g" | sed -z "s|^\n|${DIRECTORY}/icons/none-24.png\n|g")"
+      #echo "$filelist"
+    fi
     
     #array of buttons to send to file browser window
     buttons=()
@@ -266,14 +320,20 @@ elif [ "$1" == browsedrive ];then
       buttons+=(--button=Back!"${DIRECTORY}/icons/back.png"!"Up one level to <b>$(echo "$drive:$(dirname "$prefix" | sed 's/^.$//g')" | sed 's/:$//g')</b>":2)
     fi
     buttons+=(--button='Add files'!"${DIRECTORY}/icons/upload.png"!"Upload files to the current folder, or into a subfolder if one is selected.":10 \
-      --button=Delete!"${DIRECTORY}/icons/trash.png"!"Delete the selected file/folder. Note: most cloud drives let you recover deleted items.":8 \
       --button=Move!"${DIRECTORY}/icons/move.png"!"Move the selected file/folder to another location on this drive.":6 \
       --button=Link!"${DIRECTORY}/icons/link.png"!"Generate a link to share the selected file/folder publicly.":4)
     
-    output="$(echo "$filelist" | sed 's/&/&amp;/g' | yad "${yadflags[@]}" --list --column=:IMG --column=file --no-headers --print-column=2 \
-      --width=300 --height=400 --text="Double-click to open files/folders." \
-     "${buttons[@]}" )"
-    button=$?
+    if [ $fastmode == 0 ];then
+      output="$(echo "$LIST" | sed 's/&/&amp;/g' | yad "${yadflags[@]}" --list --column=:IMG --column=Name --column=trueName:HD --column=Size:SZ --column=MimeType:HD --column=ModTime --column=IsDir:HD --column=ID:HD --print-column=3 \
+        --width=750 --height=400 --text="$([ ! -z "$prefix" ] && echo -e "Currently in <b>$(echo "$prefix" | sed 's|/$||g')</b>\r")Double-click to open files/folders." \
+       "${buttons[@]}" )"
+      button=$?
+    else
+      output="$(echo "$filelist" | sed 's/&/&amp;/g' | yad "${yadflags[@]}" --list --column=:IMG --column=Name --print-column=2 \
+        --width=300 --height=400 --text="Double-click to open files/folders." \
+       "${buttons[@]}" )"
+      button=$?
+    fi
     
     echo -e "Output is $output\nPrefix is $prefix"
     
@@ -302,14 +362,19 @@ elif [ "$1" == browsedrive ];then
         warning "A file or folder must be selected in order to move it!"
       else
         moveto="$(yad "${yadflags[@]}" --form --width=400 --text="  Enter a path to move the chosen file:" \
-          --field="From ":RO "$prefix$output" \
-          --field="To " "$prefix$output")"
+          --field="From ":RO "$prefix$(echo "$output" | sed 's|/$||g')" \
+          --field="To " "$prefix$(echo "$output" | sed 's|/$||g')" \
+          --button=Cancel:1 \
+          --button=Delete!"${DIRECTORY}/icons/trash.png"!"Delete <b>$drive:$prefix$(echo "$output" | sed 's|/$||g')</b> from the cloud. Note: Most cloud storage providers will save deleted items in a recovery folder.":2 \
+          --button=Move!"${DIRECTORY}/icons/move.png":0)"
         button=$?
         
-        #remove trailing and leading slashes from output, and only keep second line
-        moveto="$(echo "$moveto" | grep . | sed 's|^/||g' | sed 's|/$||g' | sed -n 2p)"
-        
         if [ $button == 0 ];then
+          #move file
+          
+          #remove trailing and leading slashes from output, and only keep second line
+          moveto="$(echo "$moveto" | grep . | sed 's|^/||g' | sed 's|/$||g' | sed -n 2p)"
+          
           (echo "# "; sleep 20; echo "# This is taking longer than expected to complete."; sleep infinity) | yad "${yadflags[@]}" --progress --pulsate --title="Moving..." \
             --text="Moving <b>$prefix$output</b>"$'\n'"to <b>$moveto</b>..." \
             --width=300 --height=100 --center --auto-close --auto-kill \
@@ -320,25 +385,22 @@ elif [ "$1" == browsedrive ];then
             warning "Failed to move <b>$prefix$output</b> to <b>$moveto</b>.\nErrors: $errors"
           fi
           kill $loader_pid
+          
+        elif [ $button == 2 ];then
+          #delete file
+          (echo "# "; sleep 20; echo "# This is taking longer than expected to complete."; sleep infinity) | yad "${yadflags[@]}" --progress --pulsate --title="Deleting..." \
+            --text="Deleting <b>$drive:$prefix$output</b>..." \
+            --width=300 --height=100 --center --auto-close --auto-kill \
+            --no-buttons 2>/dev/null &
+          loader_pid=$!
+          if [[ "$output" == */ ]];then
+            #if folder, delete folder
+            rclone purge "$drive:$prefix$output"
+          else
+            rclone deletefile "$drive:$prefix$output"
+          fi
+          kill $loader_pid #close the progress bar window
         fi
-      fi
-    elif [ $button == 8 ];then
-      #delete selected
-      if [ -z "$output" ];then
-        warning "A file or folder must be selected in order to delete it!"
-      else
-        (echo "# "; sleep 20; echo "# This is taking longer than expected to complete."; sleep infinity) | yad "${yadflags[@]}" --progress --pulsate --title="Deleting..." \
-          --text="Deleting <b>$drive:$prefix$output</b>..." \
-          --width=300 --height=100 --center --auto-close --auto-kill \
-          --no-buttons 2>/dev/null &
-        loader_pid=$!
-        if [[ "$output" == */ ]];then
-          #if folder, delete folder
-          rclone purge "$drive:$prefix$output"
-        else
-          rclone deletefile "$drive:$prefix$output"
-        fi
-        kill $loader_pid #close the progress bar window
       fi
     elif [ $button == 10 ];then
       #upload files
@@ -383,7 +445,7 @@ elif [ "$1" == browsedrive ];then
       if [[ "$output" == */ ]];then
         echo "Folder selected: $(echo "$output" | sed 's|/$||g')"
         if [ ! -z $prefix ];then
-          prefix="$prefix/$output"
+          prefix="$prefix$output"
         else
           prefix="$output"
         fi
