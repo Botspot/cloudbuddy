@@ -45,7 +45,7 @@ if {$force_conservative} {
 set timeout -1
 spawn rclone config
 match_max 100000
-expect -exact "e/n/d/r/c/s/q> "
+expect -exact "/q> "
 send -- "n\r"
 expect -exact "name> "
 send -- "$env(drivename)\r"
@@ -73,6 +73,6 @@ expect -exact "y/n> "
 send -- "y\r"
 expect -exact "y/e/d> "
 send -- "y\r"
-expect -exact "e/n/d/r/c/s/q> "
+expect -exact "/q> "
 send -- "q\r"
 expect eof
