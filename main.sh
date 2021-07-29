@@ -19,6 +19,10 @@ echobright() {
   echo -e "\e[97m$@\e[39m"
 }
 
+echoblue() {
+  echo -e "\e[96m$@\e[39m"
+}
+
 list_descendants() { #list descent PIDs to the given parent PID.
   #This is used to kill yad when a parent script is killed.
   #https://unix.stackexchange.com/a/124148/369481
@@ -197,7 +201,8 @@ if [ "$1" == newdrive ];then
     #change button number to script-readable drive type
     drivetype="$(echo "$button" | sed s/4/gdrive/g | sed s/2/onedrive/g | sed s/0/dropbox/g)"
     
-    echobright "expect "\""${DIRECTORY}/expect-scripts/${drivetype}.exp"\"""
+    echoblue "expect "\""${DIRECTORY}/expect-scripts/${drivetype}.exp"\"""
+    echobright "The expect script runs $(echoblue "rclone config")."
     #These expect scripts read the "drivename" environment variable.
     drivename="$drive"
     expect "${DIRECTORY}/expect-scripts/${drivetype}.exp" &
@@ -238,10 +243,10 @@ elif [ "$1" == removedrive ];then
   fi
   [ -z "$drive" ] && back
   
-  echobright "rclone config disconnect "\""$drive:"\"""
+  echoblue "rclone config disconnect "\""$drive:"\"""
   rclone config disconnect "$drive": || echobright "Don't worry - rclone errors above this point are normal and expected for certain cloud storage providers."
   
-  echobright "rclone config delete "\""$drive"\"""
+  echoblue "rclone config delete "\""$drive"\"""
   rclone config delete "$drive" #this rclone option DOES NOT ACCEPT A COLON!
   
 elif [ "$1" == mountdrive ];then
@@ -283,7 +288,7 @@ elif [ "$1" == mountdrive ];then
   #this will run for a minimum of 7 seconds before returning to the main window.
   sleep 7 &
   sleeppid=$!
-  echobright "rclone mount "\""$drive:"\"" "\""$directory"\"""
+  echoblue "rclone mount "\""$drive:"\"" "\""$directory"\"""
   setsid bash -c 'errors="$(rclone mount "'"$drive"'": "'"$directory"'" 2>&1)"
     [ $? != 0 ] && warning "Rclone failed to mount <b>'"$drive"'</b> to <b>'"$directory"'</b>!'$'\n''Errors: $errors"' &
   wait $sleeppid
@@ -351,7 +356,7 @@ elif [ "$1" == browsedrive ];then
     
     if [ $fastmode == 0 ];then
       #get detailed information about each file in current folder.
-      echobright "rclone lsjson "\""$drive:$(echo "$prefix" | sed 's|/$||g')"\"""
+      echoblue "rclone lsjson "\""$drive:$(echo "$prefix" | sed 's|/$||g')"\"""
       #Json format converted to parsable raw text. Example line:
       #Path=Tripod.JPG,Name=Tripod.JPG,Size=1472358,MimeType=image/jpeg,ModTime=2018-09-02T04:12:36.807Z,IsDir=false,ID=1229VLzjsD1XUm5LgdwlfoWEqwpzbWU9p
       filelist="$(rclone lsjson "$drive:$(echo "$prefix" | sed 's|/$||g')" 2>&1 | sed 's/":"/=/g' | sed 's/":/=/g' | sed 's/^{"//g' | sed 's/","/,/g' | sed 's/,"/,/g' | sed 's/"}$//g' | sed 's/},$//g' | sed 's/"},$//g' | sed 's/}$//g' | sed '/^\]$/d' | sed '/^\[$/d')"
@@ -420,7 +425,7 @@ $id"
       
     else #fastmode == 1
       #simpler file browser mode with less GUI features but it loads faster
-      echobright "rclone lsf "\""$drive:$(echo "$prefix" | sed 's|/$||g')"\"""
+      echoblue "rclone lsf "\""$drive:$(echo "$prefix" | sed 's|/$||g')"\"""
       filelist="$(rclone lsf "$drive:$(echo "$prefix" | sed 's|/$||g')" 2>&1)"
       [ $? != 0 ] && error "rclone failed to acquire a file list from <b>$drive:$prefix</b>!\nErrors: $filelist"
       kill $loader_pid #close the progress bar window
@@ -468,7 +473,7 @@ $id"
           --width=300 --height=100 --center --auto-close --auto-kill \
           --no-buttons 2>/dev/null &
         loader_pid=$!
-        echobright "rclone link "\""$drive:$prefix$output"\"""
+        echoblue "rclone link "\""$drive:$prefix$output"\"""
         link="$(rclone link "$drive:$prefix$output" 2>&1)"
         exitcode=$?
         kill $loader_pid
@@ -489,10 +494,11 @@ $id"
       else
         if [ "$(echo "$output" | wc -l)" -gt 1 ];then
           #multiple items selected, only display Delete option.
-          moveto="$(echo -e "$output" | yad "${yadflags[@]}" --text-info --fontname=12 --wrap \
+          moveto="$(echo -en "$output" | yad "${yadflags[@]}" --text-info --fontname=12 --wrap \
             --width=400 --text="When multiple items are selected, only the <b>Delete</b> option is available."$'\n'"These items were selected:" \
             --button=Cancel:1 \
-            --button=Delete!"${DIRECTORY}/icons/trash.png"!"Delete the selected <b>$(echo "$output" | wc -l) items</b> from the cloud."$'\n'"Note: Most cloud storage providers will save deleted items in a recovery folder.":2)"
+            --button=Delete!"${DIRECTORY}/icons/trash.png"!" Delete the selected <b>$(echo "$output" | wc -l) items</b> from the cloud."$'\n'" Note: Most cloud storage providers will save deleted items in a recovery folder. ":2)"
+          button=$?
         else
           #single file/folder selected, display the usual 'Move' options.
           moveto="$(yad "${yadflags[@]}" --form --width=400 --text="  Enter a path to move the chosen file:" \
@@ -515,7 +521,7 @@ $id"
             --width=300 --height=100 --center --auto-close --auto-kill \
             --no-buttons 2>/dev/null &
           loader_pid=$!
-          echobright "rclone moveto "\""$drive:$prefix$output"\"" "\""$drive:$moveto"\"""
+          echoblue "rclone moveto "\""$drive:$prefix$output"\"" "\""$drive:$moveto"\"""
           errors="$(rclone moveto "$drive:$prefix$output" "$drive:$moveto" 2>&1)"
           if [ $? != 0 ];then
             warning "Failed to move <b>$prefix$output</b> to <b>$moveto</b>.\nErrors: $errors"
@@ -524,25 +530,30 @@ $id"
           
         elif [ $button == 2 ];then
           #delete file
-          (echo "# "; sleep 20; echo "# This is taking longer than expected to complete."; sleep infinity) | yad "${yadflags[@]}" --progress --pulsate --title="Deleting..." \
-            --text="Deleting <b>$drive:$prefix$output</b>..." \
-            --width=300 --height=100 --center --auto-close --auto-kill \
-            --no-buttons 2>/dev/null &
-          loader_pid=$!
           
           #delete every file found in $output, one at a time
           IFS=$'\n'
           for file in $output ;do
+            (echo "# "; sleep 20; echo "# This is taking longer than expected to complete."; sleep infinity) | yad "${yadflags[@]}" --progress --pulsate --title="Deleting..." \
+              --text="Deleting <b>$drive:$prefix$file</b>..." \
+              --width=300 --height=100 --center --auto-close --auto-kill \
+              --no-buttons 2>/dev/null &
+            loader_pid=$!
             if [[ "$file" == */ ]];then
               #if folder, delete folder
-              echobright "rclone purge "\""$drive:$prefix$file"\"""
-              rclone purge "$drive:$prefix$file"
+              echoblue "rclone purge "\""$drive:$prefix$file"\"""
+              set -o pipefail
+              errors="$(rclone purge "$drive:$prefix$file" 2>&1 | tee /dev/stderr)"
+              exitcode=$?
             else
-              echobright "rclone deletefile "\""$drive:$prefix$file"\"""
-              rclone deletefile "$drive:$prefix$file"
+              echoblue "rclone deletefile "\""$drive:$prefix$file"\"""
+              set -o pipefail
+              errors="$(rclone deletefile "$drive:$prefix$file" 2>&1 | tee /dev/stderr)"
+              exitcode=$?
             fi
+            [ $exitcode != 0 ] && warning "Rclone failed to delete <b>$drive:$prefix$file</b>. Errors:\n$errors" &
+            kill $loader_pid #close the progress bar window
           done
-          kill $loader_pid #close the progress bar window
         fi
       fi
     elif [ $button == 8 ];then
@@ -644,7 +655,8 @@ $id"
           --button=Cancel:"bash -c '$0 browsedrive "\""$drive"\"" "\""$prefix"\""; kill $$ $(list_descendants $$)'" &
         loader_pid=$!
         
-        echobright "rclone copy "\""$drive:$prefix$output\""" "\""$tmpdir"\"""
+        echoblue "rclone copy "\""$drive:$prefix$output\""" "\""$tmpdir"\"""
+        set -o pipefail
         errors="$(rclone copy -P "$drive:$prefix$output" "$tmpdir" 2>&1 | tee /dev/stderr)"
         exitcode=$?
         kill $loader_pid #close the progress bar window
@@ -688,7 +700,7 @@ fi
 #if user has configured at least 1 drive, display these buttons:
 if [ ! -z "$remotes" ];then
   mountbutton=(--field="Mount Drive"!"${DIRECTORY}/icons/mount.png"!"Connect a cloud drive to your computer like a USB drive":FBTN "$0 mountdrive")
-  browsebutton=(--field="Browse Drive"!"${DIRECTORY}/icons/browse.png"!"A simple file explorer with link creation and file-downloading support":FBTN "$0 browsedrive")
+  browsebutton=(--field="Browse Drive"!"${DIRECTORY}/icons/browse.png"!"A built-in file browser to create sharable links, upload files, download files, move files, or delete files.":FBTN "$0 browsedrive")
 fi
 
 yad "${yadflags[@]}" --width=400 --form --columns=2 \
