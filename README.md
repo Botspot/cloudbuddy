@@ -60,7 +60,7 @@ This uses [rclone's `mount` command](https://rclone.org/commands/rclone_mount/) 
 2. Select a drive to continue.  
 ![Screenshot from 2021-07-30 10-17-07](https://user-images.githubusercontent.com/54716352/127712269-991703a1-d8f7-43d1-901d-d191f254cbd1.png)
 3. This is CloudBuddy's built-in file browser. It exclusively uses rclone commands for navigation and all operations are performed server-side.  
-![Screenshot from 2021-07-30 10-45-49](https://user-images.githubusercontent.com/54716352/127714250-17785459-cedc-4fdc-9e9b-0cf79de1357a.png)
+![Screenshot from 2021-07-30 10-45-49](https://user-images.githubusercontent.com/54716352/127714250-17785459-cedc-4fdc-9e9b-0cf79de1357a.png)  
 The file browser is capable of:  
   - **Uploading** files or folders with this handy drag-n-drop window:  
   ![Screenshot from 2021-07-30 11-04-10](https://user-images.githubusercontent.com/54716352/127687058-53d6b01c-b84a-4055-9805-fe83df54ea42.png)
