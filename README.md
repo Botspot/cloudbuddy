@@ -78,14 +78,14 @@ Fun fact: I (Botspot, the maker of CloudBuddy) was not aware rclone had this fea
 And with that, the GUI usage tutorial comes to an end. If CloudBuddy was designed right, you didn't really need to read it.
 
 ## Command-line options
-CloudBuddy is run by a single bash ***megascript***. It's not that long a script though, so why do I call it called a *mega*script?
-Because CloudBuddy's `main.sh` script is actually **many bash scripts in one**.
+CloudBuddy is run by a single bash ***megascript***. It's not that long a script though, so why do I call it called a *mega*script?  
+Because CloudBuddy's `main.sh` script is actually **many bash scripts in one**.  
 When you launch CloudBuddy, it will start at the top of the script, run [a little preliminary stuff](https://github.com/Botspot/cloudbuddy#first-run) like update-checking, then ***skip*** nearly all the way to the end of the script and launch the main choice window. When you click a button, *that window will run another background instance* of CloudBuddy's `main.sh` with a command-line flag to preserve which button you clicked.  
 This approach has its downsides, but it is necessary for the main window to have a button layout of **3-by-2**. Otherwise, all 6 buttons would be in one long row - which would look horrible and would prevent additional buttons from being added due to space constraints.  
 Did I mention that all CloudBuddy windows use **`yad`**? This dialog box utility is the most robust GTK dialog available for bash scripting, and is the basis of [Pi-Apps](https://github.com/Botspot/pi-apps), [Pi Power Tools](https://github.com/Botspot/Pi-Power-Tools), [YouTubuddy](https://github.com/Botspot/youtubuddy), [Update Buddy](https://github.com/Botspot/update-buddy), [The TwisterOS Patcher](https://github.com/Botspot/TwistUP), and [Windows Screensavers for RPi](https://github.com/Botspot/Screensavers). YAD is not perfect though, and its inability to display multiple rows of exit-code-type buttons is a major hindrance.  
-**Enough said. Command-line options for CloudBuddy are below.**
-*One more thing* before the command-line options are listed: if you run CloudBuddy in a terminal, it will provide a custom-tailored command to rapidly reach the exact same place later. Example:  
-![2021-07-30-133534_1366x768_scrot](https://user-images.githubusercontent.com/54716352/127697304-cdffa962-d336-4e66-9cc7-1bfdf5ae2d50.png)
+**Enough said. Command-line options for CloudBuddy are below.**  
+*One more thing* before the command-line options are listed: if you run CloudBuddy in a terminal, it will dynamically generate a custom-tailored command to instantly reach the exact same place later. For example, if I was using the file browser and wanted to quickly reach a deep subdirectory later, this information would be very helpful:  
+![2021-07-30-133534_1366x768_scrot](https://user-images.githubusercontent.com/54716352/127697304-cdffa962-d336-4e66-9cc7-1bfdf5ae2d50.png)  
 #### Source CloudBuddy's functions and then exit
 Necessary for when CloudBuddy is downloading or uploading something in a terminal and we want to reuse CloudBuddy's colorized-`echo` functions.
 ```
