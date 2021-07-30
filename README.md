@@ -35,14 +35,14 @@ This automates the [`rclone config`](https://rclone.org/commands/rclone_config/)
 1. In the main window, click this button:  
 ![Screenshot from 2021-07-30 10-04-22](https://user-images.githubusercontent.com/54716352/127684538-d8026d21-ce9f-43dd-b101-3cbe4e354e5d.png)
 2. Choose a cloud drive to sign out of.  
-![Screenshot from 2021-07-30 10-05-22](https://user-images.githubusercontent.com/54716352/127685511-28fe8678-5f3e-4889-a86f-a7d1bc45f4cf.png)
+![Screenshot from 2021-07-30 10-05-22](https://user-images.githubusercontent.com/54716352/127712410-aa9c1272-df5c-46c7-a787-3e3234a5c088.png)
 3. That's it! First, this uses [`rclone config disconnect`](https://rclone.org/commands/rclone_config_disconnect/) to ask the cloud to revoke rclone's API key, then deletes the cloud drive from `rclone`'s config file using [`rclone config delete`](https://rclone.org/commands/rclone_config_delete/).
 ## Mounting a drive
 This uses [rclone's `mount` command](https://rclone.org/commands/rclone_mount/) to view your cloud drive as if it was an external data disk.
 1. In the main window, click this button:  
 ![Screenshot from 2021-07-30 10-12-08](https://user-images.githubusercontent.com/54716352/127685235-1efae846-d9ec-4203-b01b-f6e41b83791e.png)
 2. Select a drive to continue.  
-![Screenshot from 2021-07-30 10-17-07](https://user-images.githubusercontent.com/54716352/127685489-1c963ed6-8ab8-446f-97b9-c4aedbcac5e4.png)
+![Screenshot from 2021-07-30 10-17-07](https://user-images.githubusercontent.com/54716352/127712269-991703a1-d8f7-43d1-901d-d191f254cbd1.png)
 3. Choose an empty directory to mount the cloud drive to.  
 ![Screenshot from 2021-07-30 10-22-20](https://user-images.githubusercontent.com/54716352/127685584-86ee15fc-6d2f-4d56-b43c-5d30ea9fb9d5.png)
 4. Wait for it...  
@@ -58,7 +58,7 @@ This uses [rclone's `mount` command](https://rclone.org/commands/rclone_mount/) 
 1. In the main window, click this button:  
 ![Screenshot from 2021-07-30 10-41-39](https://user-images.githubusercontent.com/54716352/127687406-6382a4e8-6658-467e-abb2-688068ef0727.png)
 2. Select a drive to continue.  
-![Screenshot from 2021-07-30 10-17-07](https://user-images.githubusercontent.com/54716352/127685840-104d4735-2158-48cd-a743-715abdc670b9.png)
+![Screenshot from 2021-07-30 10-17-07](https://user-images.githubusercontent.com/54716352/127712269-991703a1-d8f7-43d1-901d-d191f254cbd1.png)
 3. This is CloudBuddy's built-in file browser. It exclusively uses rclone commands for navigation and all operations are performed server-side.  
 ![Screenshot from 2021-07-30 10-22-20](https://user-images.githubusercontent.com/54716352/127685928-0b6f06e4-fad3-4b4d-8869-39678af793ea.png)  
 The file browser is capable of:  
