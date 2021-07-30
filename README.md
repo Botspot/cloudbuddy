@@ -51,7 +51,7 @@ This uses [rclone's `mount` command](https://rclone.org/commands/rclone_mount/) 
 ## Unmounting a drive
 1. In the main window, click this button:  
 ![Screenshot from 2021-07-30 10-35-26](https://user-images.githubusercontent.com/54716352/127685787-d97a4c2a-27e5-419e-ad43-2c1ae822fd62.png)
-2. Choose a drive to be unmounted.
+2. Choose a drive to be unmounted.  
 ![Screenshot from 2021-07-30 10-39-19](https://user-images.githubusercontent.com/54716352/127686225-93ad674d-478f-4fed-918d-3add6a0a1bdc.png)
 3. Done!
 ## Browsing a drive
@@ -59,25 +59,68 @@ This uses [rclone's `mount` command](https://rclone.org/commands/rclone_mount/) 
 ![Screenshot from 2021-07-30 10-41-39](https://user-images.githubusercontent.com/54716352/127687406-6382a4e8-6658-467e-abb2-688068ef0727.png)
 2. Select a drive to continue.  
 ![Screenshot from 2021-07-30 10-17-07](https://user-images.githubusercontent.com/54716352/127685840-104d4735-2158-48cd-a743-715abdc670b9.png)
-3. This is CloudBuddy's built-in file browser. It exclusively uses rclone commands for navigation and all operations are performed server-side.
-![Screenshot from 2021-07-30 10-22-20](https://user-images.githubusercontent.com/54716352/127685928-0b6f06e4-fad3-4b4d-8869-39678af793ea.png)
-The file browser is capable of:
-  - **Uploading** files or folders with this handy drag-n-drop window:
+3. This is CloudBuddy's built-in file browser. It exclusively uses rclone commands for navigation and all operations are performed server-side.  
+![Screenshot from 2021-07-30 10-22-20](https://user-images.githubusercontent.com/54716352/127685928-0b6f06e4-fad3-4b4d-8869-39678af793ea.png)  
+The file browser is capable of:  
+  - **Uploading** files or folders with this handy drag-n-drop window:  
   ![Screenshot from 2021-07-30 11-04-10](https://user-images.githubusercontent.com/54716352/127687058-53d6b01c-b84a-4055-9805-fe83df54ea42.png)
-  - **Downloading** the selected file(s) or folder(s) from the list to $HOME/Downloads. This takes advantage of [`rclone copy`](https://rclone.org/commands/rclone_copy/). Just look at that pretty terminal output!
+  - **Downloading** the selected file(s) or folder(s) from the list to $HOME/Downloads. This takes advantage of [`rclone copy`](https://rclone.org/commands/rclone_copy/). Just look at that pretty terminal output!  
   ![2021-07-30-121153_1366x768_scrot](https://user-images.githubusercontent.com/54716352/127688484-5a97dafc-7561-456b-a26a-ca0d5c2a9cd9.png)
-  - **Moving** or **Renaming** an item. This uses [the `rclone moveto` command](https://rclone.org/commands/rclone_moveto/) - it makes an API call to the cloud drive to perform the operation so no large downloads or uploads have to occur.
+  - **Moving** or **Renaming** an item. This uses [the `rclone moveto` command](https://rclone.org/commands/rclone_moveto/) - it makes an API call to the cloud drive to perform the operation so no large downloads or uploads have to occur.  
   ![Screenshot from 2021-07-30 12-17-19](https://user-images.githubusercontent.com/54716352/127690463-465ee964-08e4-427a-9798-61d3ce6fe069.png)
-  - **Deleting** the selected file(s) or folder(s) from the cloud drive. This uses [`rclone purge`](https://rclone.org/commands/rclone_purge/) or [`rclone deletefile`](https://rclone.org/commands/rclone_deletefile/) commands. Keep in mind that most cloud drives will keep deleted items in a recovery folder for a while.
-  - **Creating a publically sharable link** to the selected file or folder.
-  ![Screenshot from 2021-07-30 12-40-19](https://user-images.githubusercontent.com/54716352/127691403-3da765ae-9fc1-47d2-bd49-3f32876986f6.png)
-  Notice the above **Copy** button. Because it uses `xclip` to copy the URL, CloudBuddy lists `xclip` as a dependency package.
+  - **Deleting** the selected file(s) or folder(s) from the cloud drive. This uses [`rclone purge`](https://rclone.org/commands/rclone_purge/) or [`rclone deletefile`](https://rclone.org/commands/rclone_deletefile/) commands. Keep in mind that most cloud drives will keep deleted items in a recovery folder for a while.  
+  - **Creating a publically sharable link** to the selected file or folder.  
+  ![Screenshot from 2021-07-30 12-40-19](https://user-images.githubusercontent.com/54716352/127691403-3da765ae-9fc1-47d2-bd49-3f32876986f6.png)  
+  Notice the above **Copy** button. Because it uses `xclip` to copy the URL, CloudBuddy treats `xclip` as a required dependency.
 ## Web Interface
 This simple button runs [rclone's built-in browser interface](https://rclone.org/gui/).  
 Fun fact: I (Botspot, the maker of CloudBuddy) was not aware rclone had this feature until *after* CloudBuddy was mostly complete.
 And with that, the GUI usage tutorial comes to an end. If CloudBuddy was designed right, you didn't really need to read it.
 
 ## Command-line options
-CloudBuddy is run by a single bash **megascript**. It's not that long a script though, so why do I call it called a *mega*script?
-Because CloudBuddy's `main.sh` script is actually many bash scripts in one.
-When you launch CloudBuddy, it will start at the top of the script, run [a little preliminary stuff](https://github.com/Botspot/cloudbuddy#first-run) like update-checking, then ***skip*** nearly all the way to the bottoom of the script and launch the main choice window. When you click a button, *that window will run another background instance* of CloudBuddy's `main.sh` with a command-line flag to preserve which button you clicked. This approach has its downsides, but it is necessary for the main window to have a button layout of 3-by-2. Otherwise, all 6 buttons would be in one long row, and nobody wants that.
+CloudBuddy is run by a single bash ***megascript***. It's not that long a script though, so why do I call it called a *mega*script?
+Because CloudBuddy's `main.sh` script is actually **many bash scripts in one**.
+When you launch CloudBuddy, it will start at the top of the script, run [a little preliminary stuff](https://github.com/Botspot/cloudbuddy#first-run) like update-checking, then ***skip*** nearly all the way to the end of the script and launch the main choice window. When you click a button, *that window will run another background instance* of CloudBuddy's `main.sh` with a command-line flag to preserve which button you clicked.  
+This approach has its downsides, but it is necessary for the main window to have a button layout of **3-by-2**. Otherwise, all 6 buttons would be in one long row - which would look horrible and would prevent additional buttons from being added due to space constraints.  
+Did I mention that all CloudBuddy windows use **`yad`**? This dialog box utility is the most robust GTK dialog available for bash scripting, and is the basis of [Pi-Apps](https://github.com/Botspot/pi-apps), [Pi Power Tools](https://github.com/Botspot/Pi-Power-Tools), [YouTubuddy](https://github.com/Botspot/youtubuddy), [Update Buddy](https://github.com/Botspot/update-buddy), [The TwisterOS Patcher](https://github.com/Botspot/TwistUP), and [Windows Screensavers for RPi](https://github.com/Botspot/Screensavers). YAD is not perfect though, and its inability to display multiple rows of exit-code-type buttons is a major hindrance.  
+**Enough said. Command-line options for CloudBuddy are below.**
+*One more thing* before the command-line options are listed: if you run CloudBuddy in a terminal, it will provide a custom-tailored command to rapidly reach the exact same place later. Example:  
+![2021-07-30-133534_1366x768_scrot](https://user-images.githubusercontent.com/54716352/127697304-cdffa962-d336-4e66-9cc7-1bfdf5ae2d50.png)
+#### Source CloudBuddy's functions and then exit
+Necessary for when CloudBuddy is downloading or uploading something in a terminal and we want to reuse CloudBuddy's colorized-`echo` functions.
+```
+source ~/cloudbuddy/main.sh source
+```
+More functions may be added in the future, but at the time of writing this they are: `error`, `warning`, `echobright`, `echocommand`, `echoprogress`, `list_descendants`, `back`, `drivetype`, and `choosedrive`.
+#### New drive
+```
+~/cloudbuddy/main.sh newdrive
+```
+Optionally, a drive name and drive type can be specified (in that order) on the command-line to skip launching the selection window.
+#### Remove drive
+```
+~/cloudbuddy/main.sh newdrive
+```
+Optionally, a drive name can be specified on the command-line to skip launching the selection window.
+#### Mount drive
+```
+~/cloudbuddy/main.sh mountdrive
+```
+Optionally, a drive name and mountpoint can be specified (in that order) on the command-line to skip launching the selection window.
+#### Unmount drive
+```
+~/cloudbuddy/main.sh unmountdrive
+```
+Optionally, a drive name, OR a mountpoint can be specified on the command-line to skip launching the selection window.
+#### Browse drive
+```
+~/cloudbuddy/main.sh browsedrive
+```
+Optionally, a drive can be specified on the command-line to skip launching the selection window. Additionally, you can specify a subfolder to begin in, like this:
+```
+~/cloudbuddy/main.sh browsedrive "My Google Drive:Attachments/old stuff"
+```
+#### Web Interface
+```
+~/cloudbuddy/main.sh webinterface
+```
