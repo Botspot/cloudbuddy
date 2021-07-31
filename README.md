@@ -17,10 +17,10 @@ When running for the first time, CloudBuddy will:
 - Check and install **dependencies**: `yad`, `xclip`, `expect`, `rclone`.  Note: If `rclone` is already installed with **`apt`**, consider uninstalling it so CloudBuddy can install the latest version of [`rclone` from source](https://rclone.org/downloads/).
 - Add a **Main menu launcher**. (`~/.local/share/applications/cloudbuddy.desktop`) This launcher is located under the **Internet** category.
 - Make sure the "**`fuse`**" kernel module has been loaded so that `rclone` can mount drives. If fuse is not loaded, CloudBuddy will attempt to load it by running `sudo modprobe fuse`. If that fails, CloudBuddy's mounting capabilities will be disabled and hidden.
-- **Check for updates**. If the last local commit and the latest online commit do not match, CloudBuddy will run `git pull` and refresh the script if it was modified. Note: If you create a fork of this repository, you should change the github URL in the script to point to your repository. To disable update-checking, create a file at: `~/cloudbuddy/no-update`.
+- **Check for updates**. If the last local commit and the latest online commit do not match, CloudBuddy will run `git pull` and refresh the script if it was modified. Note: If you make a fork of this repository, you should change the github URL in the script to point to your repository. To disable update-checking, create a file at: `~/cloudbuddy/no-update`.
 
 ## Usage
-Note: CloudBuddy is intended to be **self-explanatory**. Everything should proceed in a logical fashon and nearly all users will have no proble, using this program.
+Note: CloudBuddy is intended to be **self-explanatory**. Everything should proceed in a logical fashon and nearly all users will have no problem using this program.
 But for those few users who wish to get acquainted with CloudBuddy before they try it out, **here you go.**
 ## Connecting to a new cloud drive
 This automates the [`rclone config`](https://rclone.org/commands/rclone_config/) process. Feel free to manually run `rclone config` for more options and a wider selection of cloud storage providers. 
