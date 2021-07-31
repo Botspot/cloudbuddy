@@ -74,8 +74,12 @@ The file browser is capable of:
   Notice the above **Copy** button. Because it uses `xclip` to copy the URL, CloudBuddy treats `xclip` as a required dependency.
 ## Web Interface
 This simple button runs [rclone's built-in browser interface](https://rclone.org/gui/).  
+1. In the main window, click this button:  
+![Screenshot from 2021-07-30 20-51-07](https://user-images.githubusercontent.com/54716352/127725151-a9b37210-5d39-431f-8fd0-b7d1671a62ba.png)
+2. A web browser should open with rclone's HTML-based interface.  
 Fun fact: I (Botspot, the maker of CloudBuddy) was not aware rclone had this feature until *after* CloudBuddy was mostly complete.
-And with that, the GUI usage tutorial comes to an end. If CloudBuddy was designed right, you didn't really need to read it.
+
+And with that, the GUI usage tutorial comes to an end. If CloudBuddy was designed correctly, you didn't have to read this to use CloudBuddy.
 
 ## Command-line options
 CloudBuddy is run by a single bash ***megascript***. It's not that long a script though, so why do I call it called a *mega*script?  
@@ -119,6 +123,10 @@ Optionally, a drive name, OR a mountpoint can be specified on the command-line t
 Optionally, a drive can be specified on the command-line to skip launching the selection window. Additionally, you can specify a subfolder to begin in, like this:
 ```
 ~/cloudbuddy/main.sh browsedrive "My Google Drive:Attachments/old stuff"
+```
+Additionally, a simpler, faster file browser can be launched if the `fastmode` variable is set to **`1`**, like this:
+```
+fastmode=1 ~/cloudbuddy/main.sh browsedrive
 ```
 #### Web Interface
 ```
