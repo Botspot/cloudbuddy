@@ -10,6 +10,12 @@ error() {
   exit 1
 }
 
+errorback() {
+  echo -e "\e[91m$1\e[39m" | sed 's|<b>||g' | sed 's|</b>||g' 1>&2
+  zenity --error --width 300 --text "$(echo -e "$1" | sed 's/&/&amp;/g' | tr -d '<>')"
+  back
+}
+
 warning() { #just like error, but doesn't exit
   echo -e "\e[91m$1\e[39m" | sed 's|<b>||g' | sed 's|</b>||g' 1>&2
   zenity --error --width 300 --text "$(echo -e "$1" | sed 's/&/&amp;/g' | tr -d '<>')"
@@ -233,7 +239,7 @@ if [ "$1" == newdrive ];then
     echobright "To get here from the command line, run this:\n$0 newdrive "\""$drive"\"" "\""$drivetype"\"""
     
     #ensure the expect script for this drivetype exists. It may not exist if the cli-specified drivetype was misspelled.
-    [ ! -f "${DIRECTORY}/expect-scripts/${drivetype}.exp" ] && error "Drive type "\""$drivetype"\"" not found.\n<b>${DIRECTORY}/expect-scripts/${drivetype}.exp</b> does not exist."
+    [ ! -f "${DIRECTORY}/expect-scripts/${drivetype}.exp" ] && errorback "Drive type "\""$drivetype"\"" not found.\n<b>${DIRECTORY}/expect-scripts/${drivetype}.exp</b> does not exist."
     
     echocommand "expect "\""${DIRECTORY}/expect-scripts/${drivetype}.exp"\"""
     echobright "The expect script runs $(echocommand "rclone config")."
@@ -292,7 +298,7 @@ elif [ "$1" == mountdrive ];then
   #Usage: main.sh mountdrive driveName /path/to/mountpoint
   echobright "Mount drive"
   if [ "$usefuse" == 0 ];then
-    error "Rclone cannot mount a drive when the 'fuse' kernel module is not loaded.\nRun this command to load the kernel module: 'sudo modprobe fuse'"
+    errorback "Rclone cannot mount a drive when the 'fuse' kernel module is not loaded.\nRun this command to load the kernel module: 'sudo modprobe fuse'"
   fi
   
   drive="$(echo "$2" | sed 's/:$//g')"
@@ -351,7 +357,7 @@ elif [ "$1" == unmountdrive ];then
   echobright "Unmount drive"
   
   if [ "$usefuse" == 0 ];then
-    error "Rclone cannot mount a drive when the 'fuse' kernel module is not loaded.\nRun this command to load the kernel module: 'sudo modprobe fuse'"
+    errorback "Rclone cannot unmount a drive when the 'fuse' kernel module is not loaded.\nRun this command to load the kernel module: 'sudo modprobe fuse'"
   fi
   
   mounts="$(mount | grep fuse.rclone | sed 's/ type fuse.rclone (.*)//g' | sed 's/: on /:/g')"
@@ -380,7 +386,7 @@ elif [ "$1" == unmountdrive ];then
   echobright "To get here from the command line, run this:\n$0 unmountdrive "\""$mountpoint"\""\nOr you could specify the drive name like this:\n$0 unmountdrive "\""$drive"\"""
   
   echocommand "fusermount -u "\""$mountpoint"\"""
-  fusermount -u "$mountpoint" || (echocommand "sudo umount "\""$mountpoint"\"""; sudo umount "$mountpoint") || error "Failed to unmount <b>$mountpoint</b>!\nErrors: $(fusermount -u "$mountpoint" 2>&1)"
+  fusermount -u "$mountpoint" || (echocommand "sudo umount "\""$mountpoint"\"""; sudo umount "$mountpoint") || errorback "Failed to unmount <b>$mountpoint</b>!\nErrors: $(fusermount -u "$mountpoint" 2>&1)"
   
 elif [ "$1" == browsedrive ];then
   #Usage: main.sh browsedrive driveName:prefix
@@ -425,7 +431,7 @@ elif [ "$1" == browsedrive ];then
       #Json format converted to parsable raw text. Example line:
       #Path=Tripod.JPG,Name=Tripod.JPG,Size=1472358,MimeType=image/jpeg,ModTime=2018-09-02T04:12:36.807Z,IsDir=false,ID=1229VLzjsD1XUm5LgdwlfoWEqwpzbWU9p
       filelist="$(rclone lsjson "$drive:$(echo "$prefix" | sed 's|/$||g')" 2>&1 | sed 's/":"/=/g' | sed 's/":/=/g' | sed 's/^{"//g' | sed 's/","/,/g' | sed 's/,"/,/g' | sed 's/"}$//g' | sed 's/},$//g' | sed 's/"},$//g' | sed 's/}$//g' | sed '/^\]$/d' | sed '/^\[$/d')"
-      [ $? != 0 ] && error "rclone failed to acquire a file list from <b>$drive:$prefix</b>!\nErrors: $filelist"
+      [ $? != 0 ] && errorback "rclone failed to acquire a file list from <b>$drive:$prefix</b>!\nErrors: $filelist"
       #echo "$filelist"
       
       #Don't kill the loading window now, kill it when list parsing is done.
@@ -492,7 +498,7 @@ $id"
       #simpler file browser mode with less GUI features but it loads faster
       echocommand "rclone lsf "\""$drive:$(echo "$prefix" | sed 's|/$||g')"\"""
       filelist="$(rclone lsf "$drive:$(echo "$prefix" | sed 's|/$||g')" 2>&1)"
-      [ $? != 0 ] && error "rclone failed to acquire a file list from <b>$drive:$prefix</b>!\nErrors: $filelist"
+      [ $? != 0 ] && errorback "rclone failed to acquire a file list from <b>$drive:$prefix</b>!\nErrors: $filelist"
       kill $loader_pid #close the progress bar window
       filelist="$(echo "$filelist" | tac | sed 's/$/\n/g' | sed "s|/"'$'"|/\n${DIRECTORY}/icons/folder.png|g" | tac | sed -z "s|\n${DIRECTORY}/icons/folder.png|${DIRECTORY}/icons/folder.png|g" | sed -z "s|\n\n|\n${DIRECTORY}/icons/none-24.png\n|g" | sed -z "s|^\n|${DIRECTORY}/icons/none-24.png\n|g")"
       #echo "$filelist"
