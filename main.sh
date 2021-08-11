@@ -194,6 +194,11 @@ Categories=Application;Network;RemoteAccess;
 StartupNotify=true" > ~/.local/share/applications/cloudbuddy.desktop
 fi
 
+if [ "$1" == setup ];then
+  echo "CloudBuddy setup complete."
+  exit 0
+fi
+
 if [ -d /dev/shm ];then
   #if linux kernel's RAM disk directory exists, use it for signaling
   useshm=1

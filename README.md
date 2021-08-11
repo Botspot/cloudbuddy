@@ -1,3 +1,4 @@
+
 ![program icon](https://raw.githubusercontent.com/Botspot/cloudbuddy/main/icons/cloud.png)
 # CloudBuddy
 Bash-based GUI client for [`rclone`](https://rclone.org/). This was written by Botspot on 7/29/2021.
@@ -88,8 +89,13 @@ When you launch CloudBuddy, it will start at the top of the script, run [a littl
 This approach has its downsides, but it is necessary for the main window to have a button layout of **3-by-2**. Otherwise, all 6 buttons would be in one long row - which would look horrible and would prevent additional buttons from being added due to space constraints.  
 Did I mention that all CloudBuddy windows use **`yad`**? This dialog box utility is the most robust GTK dialog available for bash scripting, and is the basis of [Pi-Apps](https://github.com/Botspot/pi-apps), [Pi Power Tools](https://github.com/Botspot/Pi-Power-Tools), [YouTubuddy](https://github.com/Botspot/youtubuddy), [Update Buddy](https://github.com/Botspot/update-buddy), [The TwisterOS Patcher](https://github.com/Botspot/TwistUP), and [Windows Screensavers for RPi](https://github.com/Botspot/Screensavers). YAD is not perfect though, and its inability to display multiple rows of exit-code-type buttons is a major hindrance.  
 **Enough said. Command-line options for CloudBuddy are below.**  
-*One more thing* before the command-line options are listed: if you run CloudBuddy in a terminal, it will dynamically generate a custom-tailored command to instantly reach the exact same place later. For example, if I was using the file browser and wanted to quickly reach a deep subdirectory later, this information would be very helpful:  
+PRO TIP: if you run CloudBuddy in a terminal, it will dynamically generate a custom-tailored command to instantly reach the exact same place later. For example, if I was using the file browser and wanted to quickly reach a deep subdirectory later, this information would be very helpful:  
 ![2021-07-30-133534_1366x768_scrot](https://user-images.githubusercontent.com/54716352/127697304-cdffa962-d336-4e66-9cc7-1bfdf5ae2d50.png)  
+#### Set up CloudBuddy and then exit
+On every launch, CloudBuddy checks for dependencies and creates a menu launcher. To run this preliminary stuff and then exit immediately, use this command-line flag:
+```
+~/cloudbuddy/main.sh setup
+```
 #### Source CloudBuddy's functions and then exit
 Necessary for when CloudBuddy is downloading or uploading something in a terminal and we want to reuse CloudBuddy's colorized-`echo` functions.
 ```
