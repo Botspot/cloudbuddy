@@ -6,7 +6,7 @@ Bash-based GUI client for [`rclone`](https://rclone.org/). This was written by B
 
 ## Installation:
 [![badge](https://github.com/Botspot/pi-apps/blob/master/icons/badge.png?raw=true)](https://github.com/Botspot/pi-apps)  
-**Download**
+### Or, to download manually:
 ```
 git clone https://github.com/Botspot/cloudbuddy
 ```
