@@ -110,7 +110,7 @@ More functions may be added in the future, but at the time of writing this they 
 Optionally, a drive name and drive type can be specified (in that order) on the command-line to skip launching the selection window.
 #### Remove drive
 ```
-~/cloudbuddy/main.sh newdrive
+~/cloudbuddy/main.sh removedrive
 ```
 Optionally, a drive name can be specified on the command-line to skip launching the selection window.
 #### Mount drive
