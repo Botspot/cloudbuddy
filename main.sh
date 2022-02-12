@@ -797,7 +797,7 @@ if [ ! -z "$remotes" ];then
   removebutton=(--field="Remove Drive"!"${DIRECTORY}/icons/remove.png"!"Sign out of an existing cloud drive":FBTN "$0 removedrive")
 fi
 
-yad "${yadflags[@]}" --width=400 --form --columns=2 \
+yad "${yadflags[@]}" --width=400 --form --columns=2 --no-buttons \
   --field="New Drive"!"${DIRECTORY}/icons/new.png"!"Connect to a new cloud drive":FBTN "$0 newdrive" \
   "${mountbutton[@]}" \
   "${browsebutton[@]}" \
