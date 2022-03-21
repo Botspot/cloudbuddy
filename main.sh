@@ -167,13 +167,13 @@ fi
 
 #check for fuse kernel module. Launch it if necessary. If still not running, set usefuse var to zero.
 usefuse=1
-if ! lsmod | grep -q fuse ;then
+if ! ls /sys/module | awk '{print $1}' | grep -qFx fuse ;then
   echobright "Kernel module 'fuse' not found. Attempting to load it..."
   echocommand "sudo modprobe fuse"
   sudo modprobe fuse
   
   #check again to ensure fuse module running
-  if ! lsmod | grep -q fuse ;then
+  if ! ls /sys/module | awk '{print $1}' | grep -qFx fuse ;then
     usefuse=0
     warning "Failed to load kernel module 'fuse'!\nAs a result, rclone cannot mount cloud drives."
   fi
