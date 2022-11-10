@@ -151,7 +151,7 @@ if ! command -v rclone >/dev/null ;then
   wget https://downloads.rclone.org/rclone-current-linux-arm.zip -O rclone-current-linux-arm.zip || error "Failed to download rclone from downloads.rclone.org!"
   
   echocommand "unzip -j -o -d rclone-temp rclone-current-linux-arm.zip"
-  unzip -j -o -d rclone-temp rclone-current-linux-arm.zip || error "Failed to extract ~/rclone-current-linux-arm.zip"
+  unzip -j -o -d rclone-temp rclone-current-linux-arm.zip || error "Failed to extract rclone-current-linux-arm.zip"
   
   echocommand "sudo mv rclone-temp/rclone /usr/bin/rclone"
   sudo mv rclone-temp/rclone /usr/bin/rclone || error "Failed to move rclone binary to /usr/bin/rclone"
