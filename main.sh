@@ -151,17 +151,17 @@ if ! command -v rclone >/dev/null ;then
   wget https://downloads.rclone.org/rclone-current-linux-arm.zip -O rclone-current-linux-arm.zip || error "Failed to download rclone from downloads.rclone.org!"
   
   echocommand "unzip -j -o -d rclone-temp rclone-current-linux-arm.zip"
-  unzip -j -o -d rclone-temp rclone-current-linux-arm.zip || error "Failed to extract ~/rclone-current-linux-arm.zip"
+  unzip -j -o -d rclone-temp rclone-current-linux-arm.zip || error "Failed to extract rclone-current-linux-arm.zip"
   
-  echocommand "sudo mv ~/rclone-temp/rclone /usr/bin/rclone"
-  sudo mv ~/rclone-temp/rclone /usr/bin/rclone || error "Failed to move rclone binary to /usr/bin/rclone"
-  echobright "sudo mv ~/rclone-temp/rclone.1 /usr/share/man/man1/rclone.1"
-  sudo mv ~/rclone-temp/rclone.1 /usr/share/man/man1/rclone.1
+  echocommand "sudo mv rclone-temp/rclone /usr/bin/rclone"
+  sudo mv rclone-temp/rclone /usr/bin/rclone || error "Failed to move rclone binary to /usr/bin/rclone"
+  echobright "sudo mv rclone-temp/rclone.1 /usr/share/man/man1/rclone.1"
+  sudo mv rclone-temp/rclone.1 /usr/share/man/man1/rclone.1
   
   echocommand "sudo chown root: /usr/bin/rclone"
   sudo chown root: /usr/bin/rclone
-  echocommand "rm -rf ~/rclone-current-linux-arm.zip ~/rclone-temp"
-  rm -rf ~/rclone-current-linux-arm.zip ~/rclone-temp
+  echocommand "rm -rf rclone-current-linux-arm.zip rclone-temp"
+  rm -rf rclone-current-linux-arm.zip rclone-temp
   echobright "Rclone installation successful. Proceeding..."
 fi
 
