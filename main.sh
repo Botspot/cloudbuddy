@@ -98,6 +98,16 @@ $drive"
       --column='' --no-headers --text="Select a drive to continue."
   fi
 }
+
+#get OS architecture (32-bit or 64-bit)
+if [ "$(od -An -t x1 -j 4 -N 1 "$(readlink -f /sbin/init)")" = ' 02' ];then
+  arch=64
+elif [ "$(od -An -t x1 -j 4 -N 1 "$(readlink -f /sbin/init)")" = ' 01' ];then
+  arch=32
+else
+  error "Failed to detect OS CPU architecture! Something is very wrong."
+fi
+
 [ "$1" == source ] && return 0 #this script's functions can be sourced, then immediately exit, if you run 'main.sh source'
 #END OF FUNCTIONS, BEGINNING OF SCRIPT
 
@@ -144,24 +154,29 @@ fi
 command -v yad >/dev/null || (echobright "Installing 'yad'..." ; sudo apt update && sudo apt install -y yad || error "Failed to install yad!")
 command -v xclip >/dev/null || (echobright "Installing 'xclip'..." ; sudo apt update && sudo apt install -y xclip || error "Failed to install xclip!")
 command -v expect >/dev/null || (echobright "Installing 'expect'..." ; sudo apt update && sudo apt install -y expect || error "Failed to install expect!")
-if ! command -v rclone >/dev/null ;then
+#rclone installation - if rclone command missing ------------ or if armhf rclone is installed on a 64-bit system ------------------------------- or if installed version is out of date
+if ! command -v rclone >/dev/null || ([ "$arch" == 64 ] && [ "$(od -An -t x1 -j 4 -N 1 /usr/bin/rclone)" == ' 01' ]) || (version="$(cat /tmp/rclone-version >/dev/null || wget -O /tmp/rclone-version https://downloads.rclone.org/version.txt && cat /tmp/rclone-version)" && [ -s /tmp/rclone-version ] && [ "$(rclone --version | head -n1)" != "$version" ]);then
   echobright "Installing 'rclone'..."
   
-  echocommand "wget https://downloads.rclone.org/rclone-current-linux-arm.zip -O rclone-current-linux-arm.zip"
-  wget https://downloads.rclone.org/rclone-current-linux-arm.zip -O rclone-current-linux-arm.zip || error "Failed to download rclone from downloads.rclone.org!"
+  archname=arm
+  if [ "$arch" == 64 ];then
+    archname=arm64
+  fi
+  echocommand "wget https://downloads.rclone.org/rclone-current-linux-$archname.zip -O rclone-current-linux-$archname.zip"
+  wget https://downloads.rclone.org/rclone-current-linux-$archname.zip -O rclone-current-linux-$archname.zip || error "Failed to download rclone from downloads.rclone.org!"
   
-  echocommand "unzip -j -o -d rclone-temp rclone-current-linux-arm.zip"
-  unzip -j -o -d rclone-temp rclone-current-linux-arm.zip || error "Failed to extract rclone-current-linux-arm.zip"
+  echocommand "unzip -j -o -d rclone-temp rclone-current-linux-$archname.zip"
+  unzip -j -o -d rclone-temp rclone-current-linux-$archname.zip || error "Failed to extract rclone-current-linux-$archname.zip"
   
   echocommand "sudo mv rclone-temp/rclone /usr/bin/rclone"
-  sudo mv rclone-temp/rclone /usr/bin/rclone || error "Failed to move rclone binary to /usr/bin/rclone"
+  sudo mv -f rclone-temp/rclone /usr/bin/rclone || error "Failed to move rclone binary to /usr/bin/rclone"
   echobright "sudo mv rclone-temp/rclone.1 /usr/share/man/man1/rclone.1"
-  sudo mv rclone-temp/rclone.1 /usr/share/man/man1/rclone.1
+  sudo mv -f rclone-temp/rclone.1 /usr/share/man/man1/rclone.1
   
   echocommand "sudo chown root: /usr/bin/rclone"
   sudo chown root: /usr/bin/rclone
-  echocommand "rm -rf rclone-current-linux-arm.zip rclone-temp"
-  rm -rf rclone-current-linux-arm.zip rclone-temp
+  echocommand "rm -rf rclone-current-linux-$archname.zip rclone-temp"
+  rm -rf rclone-current-linux-$archname.zip rclone-temp
   echobright "Rclone installation successful. Proceeding..."
 fi
 
