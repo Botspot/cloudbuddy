@@ -153,7 +153,6 @@ fi
 #install dependencies
 command -v yad >/dev/null || (echobright "Installing 'yad'..." ; sudo apt update && sudo apt install -y yad || error "Failed to install yad!")
 command -v xclip >/dev/null || (echobright "Installing 'xclip'..." ; sudo apt update && sudo apt install -y xclip || error "Failed to install xclip!")
-command -v expect >/dev/null || (echobright "Installing 'expect'..." ; sudo apt update && sudo apt install -y expect || error "Failed to install expect!")
 #rclone installation - if rclone command missing ------------ or if armhf rclone is installed on a 64-bit system ------------------------------- or if installed version is out of date
 if ! command -v rclone >/dev/null || ([ "$arch" == 64 ] && [ "$(od -An -t x1 -j 4 -N 1 /usr/bin/rclone)" == ' 01' ]) || (version="$(cat /tmp/rclone-version >/dev/null || wget -O /tmp/rclone-version https://downloads.rclone.org/version.txt && cat /tmp/rclone-version)" && [ -s /tmp/rclone-version ] && [ "$(rclone --version | head -n1)" != "$version" ]);then
   echobright "Installing 'rclone'..."
@@ -234,7 +233,7 @@ if [ "$1" == newdrive ];then
   drivetype="$2"
   
   while [ -z "$drive" ];do #skip the drive selection window if drive is cli-specified
-    drive="$(yad "${yadflags[@]}" --form \
+    drive="$(yad "${yadflags[@]}" --form --no-escape \
       --field="Name of new drive: " '' \
       --button='Google Drive'!"${DIRECTORY}/icons/gdrive.png":4 \
       --button='OneDrive'!"${DIRECTORY}/icons/onedrive.png":2 \
@@ -252,23 +251,21 @@ if [ "$1" == newdrive ];then
         --button=OK:0 || back
     fi
     #change button number to script-readable drive type
-    drivetype="$(echo "$button" | sed s/4/gdrive/g | sed s/2/onedrive/g | sed s/0/dropbox/g)"
+    drivetype="$(echo "$button" | sed s/4/drive/g | sed s/2/onedrive/g | sed s/0/dropbox/g)"
   done #past this point, $drive is populated and a valid drive type has been selected.
   
   if [ $button == 4 ] || [ $button == 2 ] || [ $button == 0 ] || [ ! -z "$drivetype" ];then #this will be skipped if "Going back..."
     echobright "To get here from the command line, run this:\n$0 newdrive "\""$drive"\"" "\""$drivetype"\"""
     
-    #ensure the expect script for this drivetype exists. It may not exist if the cli-specified drivetype was misspelled.
-    [ ! -f "${DIRECTORY}/expect-scripts/${drivetype}.exp" ] && errorback "Drive type "\""$drivetype"\"" not found.\n<b>${DIRECTORY}/expect-scripts/${drivetype}.exp</b> does not exist."
+    configfile="$(rclone config file || echo $'\n'"$HOME/.config/rclone/rclone.conf" | tail -n +2)"
+    mkdir -p "$(dirname "$configfile")"
+    echocommand "rclone config create "\""$drive"\"" "\""$drivetype"\"" env_auth=false >> "\""$configfile"\"""
     
-    echocommand "expect "\""${DIRECTORY}/expect-scripts/${drivetype}.exp"\"""
-    echobright "The expect script runs $(echocommand "rclone config")."
-    #These expect scripts read the "drivename" environment variable.
-    drivename="$drive"
-    expect "${DIRECTORY}/expect-scripts/${drivetype}.exp" &
-    expectpid=$!
+    rclone config create "$drive" "$drivetype" env_auth=false >> "$configfile" &
+    rclonepid=$!
+    echo "$rclonepid"
     
-    (yad "${yadflags[@]}" --button='   Cancel operation   ':0
+    (yad "${yadflags[@]}" --text="A web browser should appear to authorize the connection." --button='   Cancel operation   ':0
     button=$?
     if [ $button != 0 ];then
       sleep infinity
@@ -277,20 +274,18 @@ if [ "$1" == newdrive ];then
     yadpid=$!
     
     while true;do
-      #if expect finishes, then close cancel-button window
-      if [ ! -e /proc/$expectpid ];then
+      #if rclone finishes, then close cancel-button window
+      if [ ! -e /proc/$rclonepid ];then
         kill $yadpid $(list_descendants $yadpid)
         break
       fi
-      #if cancel-button window closes, then kill expect as user must have clicked 'Cancel'
+      #if cancel-button window closes, then kill rclone as user must have clicked 'Cancel'
       if [ ! -e /proc/$yadpid ];then
-        kill $expectpid
+        kill $rclonepid
         break
       fi
       sleep 1
     done
-    #say how to run this AGAIN, because rclone output from expect script is very long
-    echobright "To get here from the command line, run this:\n$0 newdrive "\""$drive"\"" "\""$drivetype"\"""
   fi #everything in the above if statement is skipped if $button is not 0, 2, or 4
   
 elif [ "$1" == removedrive ];then
