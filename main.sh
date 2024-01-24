@@ -17,8 +17,8 @@ errorback() {
 }
 
 warning() { #just like error, but doesn't exit
-  echo -e "\e[91m$1\e[39m" | sed 's|<b>||g' | sed 's|</b>||g' 1>&2
-  zenity --error --width 300 --text "$(echo -e "$1" | sed 's/&/&amp;/g' | tr -d '<>')"
+  echo -e "\e[91m$1\e[39m" | sed 's|<b>||g ; s|</b>||g' 1>&2
+  zenity --error --width 300 --text "$(echo -e "$1" | sed 's/&/&amp;/g')"
 }
 
 #Displays something meaningful to the user that is brighter than normal output
