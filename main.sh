@@ -4,8 +4,8 @@ set -a
 DIRECTORY="$(readlink -f "$(dirname "$0")")"
 
 error() {
-  echo -e "\e[91m$1\e[39m" | sed 's|<b>||g' | sed 's|</b>||g' 1>&2
-  zenity --error --width 300 --text "$(echo -e "$1" | sed 's/&/&amp;/g' | tr -d '<>')"
+  echo -e "\e[91m$1\e[39m" | sed 's|<b>|| ; |</b>||g' 1>&2
+  zenity --error --width 300 --text "$(echo -e "$1" | sed 's/&/&amp;/g')"
   kill $(cat "${DIRECTORY}/mypid") $(list_descendants $(cat "${DIRECTORY}/mypid")) 2>/dev/null
   exit 1
 }
@@ -257,7 +257,7 @@ if [ "$1" == newdrive ];then
   if [ $button == 4 ] || [ $button == 2 ] || [ $button == 0 ] || [ ! -z "$drivetype" ];then #this will be skipped if "Going back..."
     echobright "To get here from the command line, run this:\n$0 newdrive "\""$drive"\"" "\""$drivetype"\"""
     
-    configfile="$(rclone config file || echo $'\n'"$HOME/.config/rclone/rclone.conf" | tail -n +2)"
+    configfile="$((rclone config file || echo $'\n'"$HOME/.config/rclone/rclone.conf") | tail -n +2)"
     mkdir -p "$(dirname "$configfile")"
     echocommand "rclone config create "\""$drive"\"" "\""$drivetype"\"" env_auth=false >> "\""$configfile"\"""
     
