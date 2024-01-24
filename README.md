@@ -16,7 +16,7 @@ CloudBuddy is portable and can be executed from anywhere on your filesystem. For
 ~/cloudbuddy/main.sh
 ```
 When running for the first time, CloudBuddy will:
-- Check and install **dependencies**: `yad`, `xclip`, `expect`, `rclone`.  Note: If `rclone` is already installed with **`apt`**, CloudBuddy will overwrite it with the latest version of [`rclone` from source](https://rclone.org/downloads/).
+- Check and install **dependencies**: `yad`, `xclip`, `rclone`.  Note: If `rclone` is already installed with **`apt`**, CloudBuddy will overwrite it with the latest version of [`rclone` from source](https://rclone.org/downloads/).
 - Add a **Main menu launcher**. (`~/.local/share/applications/cloudbuddy.desktop`) This launcher is located under the **Internet** category.
 - Make sure the "**`fuse`**" kernel module has been loaded so that `rclone` can mount drives. If fuse is not loaded, CloudBuddy will attempt to load it by running `sudo modprobe fuse`. If that fails, CloudBuddy's mounting capabilities will be disabled and hidden.
 - **Check for updates**. If the last local commit and the latest online commit do not match, CloudBuddy will run `git pull` and refresh the script if it was modified. Note: If you make a fork of this repository, you should change the github URL in the script to point to your repository. To disable update-checking, create a file at: `~/cloudbuddy/no-update`.
