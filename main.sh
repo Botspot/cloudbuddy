@@ -713,7 +713,7 @@ $id"
               exitcode="\$"?
             else
               echocommand rclone copy -P --stats-one-line "\"""\$"file"\"" "\""$drive:$destinationdir"\""
-              rclone copy -P --stats-one-line "\"""\$"file"\"" '$drive:$destinationdir'
+              rclone copy -P --stats-one-line "\"""\$"file"\"" "\""$drive:$destinationdir"\""
               exitcode="\$"?
             fi
             if [ "\$"exitcode != 0 ];then
