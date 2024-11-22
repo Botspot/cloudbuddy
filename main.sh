@@ -208,6 +208,13 @@ Categories=Application;Network;RemoteAccess;
 StartupNotify=true" > ~/.local/share/applications/cloudbuddy.desktop
 fi
 
+#icon
+if [ ! -f ~/.local/share/icons/cloudbuddy.png ];then
+  echobright "copying program icon..."
+  mkdir -p ~/.local/share/icons
+  cp ${DIRECTORY}/icons/cloud-square.png ~/.local/share/icons/cloudbuddy.png
+fi
+
 if [ "$1" == setup ];then
   echo "CloudBuddy setup complete."
   exit 0
@@ -220,7 +227,7 @@ else
   useshm=0
 fi
 
-yadflags=(--center --title="CloudBuddy" --separator='\n' --window-icon="${DIRECTORY}/icons/cloud-square.png")
+yadflags=(--center --title="CloudBuddy" --separator='\n' --window-icon="${DIRECTORY}/icons/cloud-square.png" --class CloudBuddy --name CloudBuddy)
 
 #generate list of remotes that rclone currently knows about
 remotes="$(rclone listremotes)"
