@@ -661,8 +661,20 @@ $id"
             if [[ "\"""\$"file"\"" == */ ]];then
               #if downloading directory, create subdirectory on destination to preserve structure
               echocommand "\""rclone copy -P --stats-one-line "\"""\\""\"""\""$drive:$prefix"\$"file"\"""\\""\"""\"" "\"""\\""\"""\""$destinationdir/"\$"file"\"""\\""\"""\"""\""
-              rclone copy -P --stats-one-line "\""$drive:$prefix"\$"file"\"" "\""$destinationdir/"\$"file"\""
-              exitcode="\$"?
+              #re-run on failure if it took over 10 minutes
+              while true;do
+                start_time="\$"(date +%s)
+                rclone copy -P --stats-one-line "\""$drive:$prefix"\$"file"\"" "\""$destinationdir/"\$"file"\""
+                exitcode="\$"?
+                end_time="\$"(date +%s)
+                if [ "\$"exitcode == 0 ];then
+                  break
+                elif [ "\$"exitcode != 0 ] && [ "\$"((end_time-start_time)) -ge 600 ];then
+                  echo -e '\n\e[101m\e[30mDownload failed! But it was going for 10 minutes, so trying again.\e[39m\e[49m'
+                else
+                  break #give up with exitcode=1
+                fi
+              done
             else
               echocommand "\""rclone copy -P --stats-one-line "\"""\\""\"""\""$drive:$prefix"\$"file"\"""\\""\"""\"" "\"""\\""\"""\""$destinationdir"\"""\\""\"""\"""\""
               rclone copy -P --stats-one-line "\""$drive:$prefix"\$"file"\"" "\""$destinationdir"\""
@@ -675,7 +687,7 @@ $id"
           if [ "\$"failed == 0 ];then
             echo -e '\e[102m\e[30mDownload succeeded! Close this window to exit.\e[39m\e[49m'
           else
-            echo -e '\e[101m\e[30mDownload failed! Errors above.\e[39m\e[49m'
+            echo -e '\n\e[101m\e[30mDownload failed! Errors above.\e[39m\e[49m'
           fi
         " "Downloading $(echo "$output" | wc -l) file$([ $(echo "$output" | wc -l) != 1 ] && echo s) to $(echo "$destinationdir" | sed "s|$HOME/|~/|g")"
       fi
