@@ -157,9 +157,15 @@ command -v xclip >/dev/null || (echobright "Installing 'xclip'..." ; sudo apt up
 if ! command -v rclone >/dev/null || ([ "$arch" == 64 ] && [ "$(od -An -t x1 -j 4 -N 1 /usr/bin/rclone)" == ' 01' ]) || (version="$(cat /tmp/rclone-version >/dev/null || wget -O /tmp/rclone-version https://downloads.rclone.org/version.txt && cat /tmp/rclone-version)" && [ -s /tmp/rclone-version ] && [ "$(rclone --version | head -n1)" != "$version" ]);then
   echobright "Installing 'rclone'..."
   
-  archname=arm
-  if [ "$arch" == 64 ];then
-    archname=arm64
+  if [ "$(uname -m)" == x86_64 ];then
+    archname=amd64
+  elif [ "$(uname -m)" == i686 ];then
+    archname=386
+  else
+    archname=arm
+    if [ "$arch" == 64 ];then
+      archname=arm64
+    fi
   fi
   echocommand "wget https://downloads.rclone.org/rclone-current-linux-$archname.zip -O rclone-current-linux-$archname.zip"
   wget https://downloads.rclone.org/rclone-current-linux-$archname.zip -O rclone-current-linux-$archname.zip || error "Failed to download rclone from downloads.rclone.org!"
